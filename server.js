@@ -4,6 +4,8 @@ const cors = require("cors")
 const app = express()
 
 app.use(cors())
+
+// 🔥 JSON parser (POST requestlar uchun kerak)
 app.use(express.json())
 
 // 🔥 STATIC FILES (frontend uchun)
