@@ -1,4 +1,73 @@
-<h1 class="text-4xl font-bold text-green-400 mb-4 drop-shadow-lg">
-  AQLLI HAMYON PRO 💰🔥
-</h1>
-<h1>TEST 123</h1> 
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>SMART HAMYON PRO</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-black text-white font-sans">
+
+<!-- HEADER -->
+<div class="flex justify-between items-center p-4 border-b border-gray-800">
+  <h1 class="text-xl text-cyan-400">SMART HAMYON 🚀</h1>
+  <button class="bg-cyan-500 px-4 py-2 rounded">Kirish</button>
+</div>
+
+<!-- BALANCE -->
+<div class="p-6">
+  <h2 class="text-gray-400">Umumiy balans</h2>
+  <h1 class="text-3xl text-green-400">$12,450</h1>
+</div>
+
+<!-- WALLET CARDS -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-4">
+
+  <div class="bg-gray-900 p-4 rounded">
+    <h2>BTC</h2>
+    <p>0.45</p>
+  </div>
+
+  <div class="bg-gray-900 p-4 rounded">
+    <h2>ETH</h2>
+    <p>2.1</p>
+  </div>
+
+  <div class="bg-gray-900 p-4 rounded">
+    <h2>USDT</h2>
+    <p>500</p>
+  </div>
+
+  <div class="bg-gray-900 p-4 rounded">
+    <h2>TON</h2>
+    <p>120</p>
+  </div>
+
+</div>
+
+<!-- BUTTONS -->
+<div class="flex gap-4 p-4">
+  <button class="bg-green-500 px-4 py-2 rounded">Yuborish</button>
+  <button class="bg-blue-500 px-4 py-2 rounded">Qabul qilish</button>
+  <button class="bg-purple-500 px-4 py-2 rounded">Almashtirish</button>
+</div>
+
+<!-- API TEST -->
+<div class="p-4">
+  <button onclick="testAPI()" class="bg-cyan-500 px-4 py-2 rounded">
+    API TEST
+  </button>
+
+  <div id="out" class="mt-4 text-green-400"></div>
+</div>
+
+<script>
+async function testAPI(){
+  let res = await fetch("/auth")
+  let data = await res.json()
+  document.getElementById("out").innerText = JSON.stringify(data)
+}
+</script>
+
+</body>
+</html>
