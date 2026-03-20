@@ -14,6 +14,29 @@
   <button class="bg-cyan-500 px-4 py-2 rounded">Kirish</button>
 </div>
 
+<!-- LOGIN / REGISTER UI 🔥 -->
+<div class="p-6 max-w-md mx-auto bg-gray-900 rounded mt-6">
+  <h2 class="text-xl mb-4 text-center text-green-400">Kirish / Ro‘yxatdan o‘tish</h2>
+
+  <input id="email" placeholder="Email"
+    class="w-full p-2 mb-3 rounded text-black">
+
+  <input id="pass" type="password" placeholder="Password"
+    class="w-full p-2 mb-3 rounded text-black">
+
+  <div class="flex gap-2">
+    <button onclick="register()"
+      class="bg-green-500 px-4 py-2 rounded w-full">
+      Register
+    </button>
+
+    <button onclick="login()"
+      class="bg-blue-500 px-4 py-2 rounded w-full">
+      Login
+    </button>
+  </div>
+</div>
+
 <!-- BALANCE -->
 <div class="p-6">
   <h2 class="text-gray-400">Umumiy balans</h2>
@@ -61,7 +84,36 @@
   <div id="out" class="mt-4 text-green-400"></div>
 </div>
 
+<!-- 🔥 SCRIPTLAR -->
 <script>
+async function register(){
+  let email = document.getElementById("email").value
+  let password = document.getElementById("pass").value
+
+  let res = await fetch("/auth/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email,password})
+  })
+
+  let data = await res.json()
+  alert(data.msg || "Ro‘yxatdan o‘tildi")
+}
+
+async function login(){
+  let email = document.getElementById("email").value
+  let password = document.getElementById("pass").value
+
+  let res = await fetch("/auth/login",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({email,password})
+  })
+
+  let data = await res.json()
+  alert(data.msg || "Kirish bajarildi")
+}
+
 async function testAPI(){
   let res = await fetch("/auth")
   let data = await res.json()
