@@ -18,6 +18,7 @@ const symbolsByMarket = {
 
 function createChart() {
     const container = document.getElementById('chart');
+    if (!container) return;
     chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
         height: container.clientHeight,
@@ -42,13 +43,13 @@ function generateMockCandles(count = 180) {
 
     for (let i = 0; i < count; i++) {
         const open = price;
-        const change = (Math.random() - 0.48) * (currentMarket === 2 ? 12 : currentMarket === 1 ? 120 : 0.008);
+        const change = (Math.random() - 0.48) * (currentMarket === 2 ? 12 : 80);
         const close = open + change;
         data.push({
             time: time,
             open: +open.toFixed(5),
-            high: + (Math.max(open, close) + Math.random() * 8).toFixed(5),
-            low: + (Math.min(open, close) - Math.random() * 8).toFixed(5),
+            high: +(Math.max(open, close) + Math.random() * 8).toFixed(5),
+            low: +(Math.min(open, close) - Math.random() * 8).toFixed(5),
             close: +close.toFixed(5)
         });
         price = close;
@@ -95,15 +96,15 @@ function renderStrategies() {
     const container = document.getElementById('strategy-list');
     container.innerHTML = `
         <div class="razgon-glow flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer">
-            <div class="flex items-center gap-3"><span class="text-magenta-400">⚡</span><span>Razgon Strategy</span></div>
+            <div><span class="text-magenta-400">⚡</span> Razgon Strategy</div>
             <span class="text-emerald-400 text-xs">ON</span>
         </div>
         <div class="flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer">
-            <div class="flex items-center gap-3"><span class="text-amber-400">📍</span><span>ICT Order Blocks</span></div>
+            <div><span class="text-amber-400">📍</span> ICT Order Blocks</div>
             <span class="text-emerald-400 text-xs">ON</span>
         </div>
         <div class="flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer">
-            <div class="flex items-center gap-3"><span class="text-blue-400">📈</span><span>EMA Cross</span></div>
+            <div><span class="text-blue-400">📈</span> EMA Cross</div>
             <span class="text-emerald-400 text-xs">ON</span>
         </div>
     `;
@@ -113,7 +114,6 @@ function addRandomSignal() {
     const type = Math.random() > 0.5 ? 'buy' : 'sell';
     const names = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB"];
     const name = names[Math.floor(Math.random() * names.length)];
-
     const signal = {
         emoji: type === 'buy' ? '⬆️' : '⬇️',
         name: `${name} ${type.toUpperCase()}`,
@@ -127,13 +127,7 @@ function addToLog(signal) {
     const container = document.getElementById('signal-log');
     const div = document.createElement('div');
     div.className = `p-4 rounded-2xl flex gap-3 ${signal.emoji === '⬆️' ? 'bg-emerald-900/30' : 'bg-red-900/30'}`;
-    div.innerHTML = `
-        <div class="text-3xl">${signal.emoji}</div>
-        <div class="flex-1">
-            <div class="font-semibold">${signal.name}</div>
-            <div class="text-xs text-cyan-400">${signal.confluence}% confluence</div>
-        </div>
-    `;
+    div.innerHTML = `<div class="text-3xl">${signal.emoji}</div><div class="flex-1"><div class="font-semibold">${signal.name}</div><div class="text-xs text-cyan-400">${signal.confluence}% confluence</div></div>`;
     container.prepend(div);
     if (container.children.length > 7) container.removeChild(container.lastChild);
 }
@@ -159,12 +153,11 @@ function analyzeScreenshot(e) {
     const content = document.getElementById('analysis-content');
     content.classList.remove('hidden');
     content.innerHTML = `
-        <div class="p-6 glass rounded-3xl">
-            <div class="text-emerald-400 text-xl font-semibold">High Confluence Signal</div>
-            <div class="text-4xl font-mono text-cyan-400 my-4">96%</div>
-            <button onclick="alert('Demo trade ochildi!'); addRandomSignal()" 
-                class="w-full py-4 bg-gradient-to-r from-cyan-500 to-magenta-500 rounded-3xl font-bold">
-                Signal bo‘yicha trade ochish
+        <div class="p-6 glass rounded-3xl text-center">
+            <div class="text-emerald-400 text-xl">High Confluence Signal</div>
+            <div class="text-5xl font-mono text-cyan-400 my-6">96%</div>
+            <button onclick="alert('Demo trade ochildi!'); addRandomSignal()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-magenta-500 rounded-3xl font-bold">
+                Trade ochish
             </button>
         </div>
     `;
@@ -202,7 +195,7 @@ function initializeApp() {
     setTimeout(addRandomSignal, 800);
     setTimeout(addRandomSignal, 1600);
 
-    console.log('%c✅ Trading Sniper Signal – Antigravity Edition To‘liq yuklandi!', 'color:#00f5ff; font-size:15px');
+    console.log('%c✅ Trading Sniper Signal Antigravity Edition – To‘liq yuklandi!', 'color:#00f5ff');
 }
 
 window.onload = initializeApp;
