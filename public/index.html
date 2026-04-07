@@ -20,19 +20,17 @@
                     <div class="w-11 h-11 bg-gradient-to-br from-cyan-400 to-magenta-500 rounded-2xl flex items-center justify-center text-3xl font-bold">⚡</div>
                     <div>
                         <h1 class="text-3xl font-bold tracking-tighter neon-text-cyan">SNIPER</h1>
-                        <p class="text-xs text-slate-400 -mt-1">ANTIGRAVITY EDITION</p>
+                        <p class="text-xs text-slate-400">ANTIGRAVITY EDITION</p>
                     </div>
                 </div>
             </div>
 
             <div class="p-4 flex gap-3">
                 <button onclick="toggleLanguage()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-medium flex items-center justify-center gap-2">
-                    <span id="current-lang">UZ</span>
-                    <i class="fas fa-globe"></i>
+                    <span id="current-lang">UZ</span> <i class="fas fa-globe"></i>
                 </button>
                 <button onclick="scanMarket()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2">
-                    <i class="fas fa-bolt"></i>
-                    <span id="scan-text">Bozorni skanerlash</span>
+                    <i class="fas fa-bolt"></i> <span id="scan-text">Bozorni skanerlash</span>
                 </button>
             </div>
 
@@ -52,32 +50,32 @@
             </div>
 
             <div class="flex-1 px-4 mt-6 overflow-auto">
-                <div class="flex items-center justify-between mb-4 px-2">
+                <div class="flex justify-between mb-4 px-2">
                     <div class="text-xs uppercase tracking-widest text-slate-500">Strategiyalar</div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="confluence-toggle" onchange="toggleConfluence()" class="sr-only peer">
-                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-                        <span class="ml-2 text-xs font-medium" id="confluence-label">Confluence</span>
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500"></div>
+                        <span class="ml-2 text-xs" id="confluence-label">Confluence</span>
                     </label>
                 </div>
                 <div id="strategy-list" class="space-y-2"></div>
             </div>
 
-            <div class="p-4 border-t border-slate-700 text-xs text-slate-500 text-center">
+            <div class="p-4 text-center text-xs text-slate-500 border-t border-slate-700">
                 99% signal aniqligi • Mock Demo
             </div>
         </div>
 
-        <!-- MAIN AREA -->
+        <!-- MAIN CHART -->
         <div class="flex-1 flex flex-col">
             <div class="h-16 glass border-b border-slate-700 flex items-center px-6 justify-between">
                 <div class="flex items-center gap-6">
                     <span id="current-symbol" class="text-3xl font-mono font-bold">Volatility 75</span>
                     <span id="current-price" class="text-emerald-400 text-2xl font-mono">1256.340</span>
-                    <span id="price-change" class="text-emerald-400 text-sm font-medium">+0.87%</span>
+                    <span id="price-change" class="text-emerald-400 text-sm">+0.87%</span>
                 </div>
 
-                <div class="flex gap-2 text-sm" id="timeframes">
+                <div class="flex gap-2 text-sm font-medium" id="timeframes">
                     <div onclick="changeTimeframe(0)" class="timeframe-btn px-4 py-1.5 rounded-xl cursor-pointer" data-tf="0">1m</div>
                     <div onclick="changeTimeframe(1)" class="timeframe-btn px-4 py-1.5 rounded-xl cursor-pointer" data-tf="1">5m</div>
                     <div onclick="changeTimeframe(2)" class="timeframe-btn active px-4 py-1.5 rounded-xl cursor-pointer" data-tf="2">15m</div>
@@ -85,27 +83,27 @@
                     <div onclick="changeTimeframe(4)" class="timeframe-btn px-4 py-1.5 rounded-xl cursor-pointer" data-tf="4">4H</div>
                 </div>
 
-                <button onclick="toggleFullScreen()" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-2xl">
+                <button onclick="toggleFullScreen()" class="ml-4 px-5 py-2 bg-slate-800 rounded-2xl">
                     <i class="fas fa-expand"></i>
                 </button>
             </div>
 
             <div class="flex-1 p-4 bg-zinc-950">
-                <div id="chart" class="w-full h-full rounded-3xl border border-slate-700 shadow-2xl"></div>
+                <div id="chart" class="w-full h-full rounded-3xl border border-slate-700"></div>
             </div>
 
-            <!-- Neural Vision -->
+            <!-- Neural Analyzer -->
             <div class="h-72 glass border-t border-slate-700 flex">
-                <div id="drop-zone" class="flex-1 flex flex-col items-center justify-center border-r border-slate-700 cursor-pointer hover:bg-slate-900/50 transition-colors"
+                <div id="drop-zone" class="flex-1 flex flex-col items-center justify-center border-r border-slate-700 cursor-pointer hover:bg-slate-900/50"
                      onclick="document.getElementById('image-upload').click()">
                     <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="analyzeScreenshot(event)">
                     <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
-                    <p class="text-slate-300">Screenshot yuklang yoki torting</p>
+                    <p class="text-slate-300">Screenshot yuklang</p>
                 </div>
-                <div class="flex-1 p-6 overflow-auto" id="analysis-result">
+                <div class="flex-1 p-6" id="analysis-result">
                     <div id="analysis-placeholder" class="text-center py-20 text-slate-400">
                         <i class="fas fa-brain text-6xl mb-6 opacity-40"></i>
-                        <p>AI tahlili natijasi shu yerda paydo bo'ladi</p>
+                        <p>AI tahlili natijasi shu yerda</p>
                     </div>
                     <div id="analysis-content" class="hidden"></div>
                 </div>
@@ -117,29 +115,28 @@
             <div class="p-6">
                 <h2 class="text-xl font-semibold">Demo Hisob</h2>
                 <div id="balance" class="text-4xl font-mono font-bold text-emerald-400">12,458.75</div>
-                <div class="text-xs text-slate-400">USD</div>
             </div>
 
             <div class="px-6">
                 <div class="bg-slate-900 rounded-3xl p-6">
-                    <div class="flex justify-between text-sm mb-4">
+                    <div class="flex justify-between mb-4">
                         <span class="text-slate-400">Risk %</span>
                         <span id="risk-value" class="font-mono">0.5</span>
                     </div>
-                    <input type="range" min="0.1" max="5" step="0.1" value="0.5" id="risk-slider"
+                    <input type="range" id="risk-slider" min="0.1" max="5" step="0.1" value="0.5" 
                            class="w-full accent-cyan-400" oninput="updateRisk(this.value)">
                 </div>
             </div>
 
             <div class="flex-1 px-6 mt-6 overflow-auto">
-                <div class="text-xs uppercase tracking-widest text-slate-500 mb-3">Ochiq pozitsiyalar</div>
+                <div class="text-xs uppercase text-slate-500 mb-3">Ochiq pozitsiyalar</div>
                 <div id="positions-list" class="space-y-3"></div>
             </div>
 
             <div class="border-t border-slate-700 h-80 flex flex-col">
                 <div class="px-6 py-4 bg-slate-900/70 flex justify-between text-xs uppercase text-slate-500">
                     <span>Signal Log</span>
-                    <button onclick="clearLog()" class="text-cyan-400 hover:text-white">Tozalash</button>
+                    <button onclick="clearLog()" class="text-cyan-400">Tozalash</button>
                 </div>
                 <div id="signal-log" class="flex-1 overflow-auto p-4 space-y-3"></div>
             </div>
