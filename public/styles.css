@@ -1,8 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-body {
-    font-family: 'Inter', system_ui, sans-serif;
-}
+body { font-family: 'Inter', system_ui, sans-serif; }
 
 .glass {
     background: rgba(15, 23, 42, 0.92);
@@ -12,10 +10,6 @@ body {
 
 .neon-text-cyan {
     text-shadow: 0 0 15px #00f5ff, 0 0 30px #00f5ff;
-}
-
-.market-tab {
-    transition: all 0.3s ease;
 }
 
 .market-tab.active {
