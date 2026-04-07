@@ -7,7 +7,7 @@ body {
 .glass {
     background: rgba(15, 23, 42, 0.92);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(148, 163, 184, 0.15);
+    border: 1px solid rgba(148, 163, 184, 0.2);
 }
 
 .neon-text-cyan {
@@ -25,10 +25,16 @@ body {
 }
 
 .timeframe-btn.active {
-    background-color: #0ea5e9;
-    color: white;
+    background-color: #22d3ee;
+    color: black;
+    font-weight: 600;
 }
 
-.strategy-item {
-    @apply flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer transition-all;
+.razgon-glow {
+    animation: razgonPulse 1.8s infinite alternate;
+}
+
+@keyframes razgonPulse {
+    from { text-shadow: 0 0 10px #ff00ff; }
+    to { text-shadow: 0 0 40px #ff00ff, 0 0 60px #ff00ff; }
 }
