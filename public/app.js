@@ -1,4 +1,4 @@
-// app.js - Trading Sniper Signal Antigravity Edition
+// app.js - Trading Sniper Signal Antigravity Edition (Yangilangan)
 let chart = null;
 let candleSeries = null;
 let currentMarket = 2;
@@ -19,13 +19,22 @@ const symbolsByMarket = {
 function createChart() {
     const container = document.getElementById('chart');
     if (!container) return;
+
     chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
         height: container.clientHeight,
-        layout: { background: { color: '#0a0f1c' }, textColor: '#94a3b8' },
-        grid: { vertLines: { color: '#1e2937' }, horzLines: { color: '#1e2937' } },
-        timeScale: { timeVisible: true }
+        layout: { 
+            background: { color: '#0a0f1c' }, 
+            textColor: '#94a3b8' 
+        },
+        grid: { 
+            vertLines: { color: '#1e2937' }, 
+            horzLines: { color: '#1e2937' } 
+        },
+        timeScale: { timeVisible: true },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal }
     });
+
     candleSeries = chart.addCandlestickSeries({
         upColor: '#22c55e',
         downColor: '#ef4444',
@@ -43,13 +52,13 @@ function generateMockCandles(count = 180) {
 
     for (let i = 0; i < count; i++) {
         const open = price;
-        const change = (Math.random() - 0.48) * (currentMarket === 2 ? 12 : 80);
+        const change = (Math.random() - 0.48) * (currentMarket === 2 ? 15 : currentMarket === 1 ? 120 : 0.008);
         const close = open + change;
         data.push({
             time: time,
             open: +open.toFixed(5),
-            high: +(Math.max(open, close) + Math.random() * 8).toFixed(5),
-            low: +(Math.min(open, close) - Math.random() * 8).toFixed(5),
+            high: +(Math.max(open, close) + Math.random() * 10).toFixed(5),
+            low: +(Math.min(open, close) - Math.random() * 10).toFixed(5),
             close: +close.toFixed(5)
         });
         price = close;
@@ -63,6 +72,29 @@ function renderChart() {
     const data = generateMockCandles();
     candleSeries.setData(data);
     chart.timeScale().fitContent();
+
+    // Chartda katta signallar qo'shish
+    addSignalsToChart(data);
+}
+
+function addSignalsToChart(data) {
+    const markers = [];
+    const signalPoints = [45, 82, 118, 155];
+
+    signalPoints.forEach((idx, i) => {
+        if (idx >= data.length) return;
+        const isBuy = i % 2 === 0;
+        markers.push({
+            time: data[idx].time,
+            position: isBuy ? 'belowBar' : 'aboveBar',
+            color: isBuy ? '#22c55e' : '#ef4444',
+            shape: isBuy ? 'arrowUp' : 'arrowDown',
+            text: isBuy ? "⚡ RAZGON BUY" : "ICT OB SELL",
+            size: 4
+        });
+    });
+
+    candleSeries.setMarkers(markers);
 }
 
 function switchMarket(index) {
@@ -96,15 +128,15 @@ function renderStrategies() {
     const container = document.getElementById('strategy-list');
     container.innerHTML = `
         <div class="razgon-glow flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer">
-            <div><span class="text-magenta-400">⚡</span> Razgon Strategy</div>
+            <div class="flex items-center gap-3"><span class="text-magenta-400">⚡</span><span>Razgon Strategy</span></div>
             <span class="text-emerald-400 text-xs">ON</span>
         </div>
         <div class="flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer">
-            <div><span class="text-amber-400">📍</span> ICT Order Blocks</div>
+            <div class="flex items-center gap-3"><span class="text-amber-400">📍</span><span>ICT Order Blocks</span></div>
             <span class="text-emerald-400 text-xs">ON</span>
         </div>
         <div class="flex items-center justify-between bg-slate-800/70 hover:bg-slate-700 px-5 py-4 rounded-2xl cursor-pointer">
-            <div><span class="text-blue-400">📈</span> EMA Cross</div>
+            <div class="flex items-center gap-3"><span class="text-blue-400">📈</span><span>EMA Cross</span></div>
             <span class="text-emerald-400 text-xs">ON</span>
         </div>
     `;
@@ -112,8 +144,9 @@ function renderStrategies() {
 
 function addRandomSignal() {
     const type = Math.random() > 0.5 ? 'buy' : 'sell';
-    const names = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB"];
+    const names = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB", "Bollinger Squeeze"];
     const name = names[Math.floor(Math.random() * names.length)];
+
     const signal = {
         emoji: type === 'buy' ? '⬆️' : '⬇️',
         name: `${name} ${type.toUpperCase()}`,
@@ -127,7 +160,13 @@ function addToLog(signal) {
     const container = document.getElementById('signal-log');
     const div = document.createElement('div');
     div.className = `p-4 rounded-2xl flex gap-3 ${signal.emoji === '⬆️' ? 'bg-emerald-900/30' : 'bg-red-900/30'}`;
-    div.innerHTML = `<div class="text-3xl">${signal.emoji}</div><div class="flex-1"><div class="font-semibold">${signal.name}</div><div class="text-xs text-cyan-400">${signal.confluence}% confluence</div></div>`;
+    div.innerHTML = `
+        <div class="text-3xl">${signal.emoji}</div>
+        <div class="flex-1">
+            <div class="font-semibold">${signal.name}</div>
+            <div class="text-xs text-cyan-400">${signal.confluence}% confluence</div>
+        </div>
+    `;
     container.prepend(div);
     if (container.children.length > 7) container.removeChild(container.lastChild);
 }
@@ -139,7 +178,7 @@ function updateRisk(val) {
 function scanMarket() {
     const btn = document.querySelector('button[onclick="scanMarket()"]');
     const original = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Skanerlanmoqda...`;
     setTimeout(() => {
         renderChart();
         addRandomSignal();
@@ -154,9 +193,10 @@ function analyzeScreenshot(e) {
     content.classList.remove('hidden');
     content.innerHTML = `
         <div class="p-6 glass rounded-3xl text-center">
-            <div class="text-emerald-400 text-xl">High Confluence Signal</div>
+            <div class="text-emerald-400 text-xl font-semibold">High Confluence Signal Detected</div>
             <div class="text-5xl font-mono text-cyan-400 my-6">96%</div>
-            <button onclick="alert('Demo trade ochildi!'); addRandomSignal()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-magenta-500 rounded-3xl font-bold">
+            <button onclick="alert('Demo trade ochildi!'); addRandomSignal()" 
+                class="w-full py-4 bg-gradient-to-r from-cyan-500 to-magenta-500 rounded-3xl font-bold">
                 Trade ochish
             </button>
         </div>
@@ -192,10 +232,19 @@ function initializeApp() {
     document.getElementById('current-symbol').textContent = currentSymbol;
     updateRisk(0.5);
 
+    // Birinchi signallar
     setTimeout(addRandomSignal, 800);
     setTimeout(addRandomSignal, 1600);
 
-    console.log('%c✅ Trading Sniper Signal Antigravity Edition – To‘liq yuklandi!', 'color:#00f5ff');
+    // Narxni real-time yangilash
+    setInterval(() => {
+        const priceEl = document.getElementById('current-price');
+        let price = parseFloat(priceEl.textContent);
+        price += (Math.random() - 0.45) * (currentMarket === 2 ? 4 : 0.0015);
+        priceEl.textContent = price.toFixed(currentMarket === 2 ? 3 : 5);
+    }, 2500);
+
+    console.log('%c✅ Trading Sniper Signal Antigravity Edition – To‘liq yuklandi va yangilandi!', 'color:#00f5ff; font-size:15px');
 }
 
 window.onload = initializeApp;
