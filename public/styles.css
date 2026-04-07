@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+    --neon-cyan: #00f5ff;
+    --neon-magenta: #ff00ff;
+    --neon-green: #39ff14;
+}
+
+body {
+    font-family: 'Inter', system_ui, sans-serif;
+}
+
+.glass {
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.neon-text-cyan { 
+    text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff; 
+}
+
+.neon-text-magenta { 
+    text-shadow: 0 0 10px #ff00ff, 0 0 25px #ff00ff; 
+}
+
+.razgon-glow {
+    animation: razgonPulse 1.8s infinite alternate;
+}
+
+@keyframes razgonPulse {
+    from { text-shadow: 0 0 10px #ff00ff; }
+    to { text-shadow: 0 0 35px #ff00ff, 0 0 60px #ff00ff; }
+}
+
+.market-tab.active {
+    border-bottom: 3px solid #00f5ff;
+    color: #00f5ff;
+}
+
+.signal-arrow {
+    font-size: 38px;
+    text-shadow: 0 0 20px currentColor;
+}
