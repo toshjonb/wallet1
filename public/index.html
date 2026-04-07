@@ -10,191 +10,234 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
         
-        body { font-family: 'Inter', system-ui, sans-serif; }
-        .title-font { font-family: 'Space Grotesk', sans-serif; }
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(180deg, #0a0f1c 0%, #02040a 100%);
+        }
+        .title-font {
+            font-family: 'Space Grotesk', sans-serif;
+        }
 
         .glass {
-            background: rgba(15, 23, 42, 0.78);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(15, 23, 42, 0.72);
+            backdrop-filter: blur(24px);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
         }
 
         .razgon-glow {
-            box-shadow: 0 0 30px #ff00ff, 0 0 60px rgba(255, 0, 255, 0.6);
-            animation: razgonPulse 2.8s infinite alternate ease-in-out;
+            box-shadow: 0 0 35px #ff00ff,
+                        0 0 60px rgba(255, 0, 255, 0.7),
+                        inset 0 0 20px rgba(255, 0, 255, 0.3);
+            animation: razgonPulse 2.4s infinite alternate ease-in-out;
         }
 
         @keyframes razgonPulse {
-            from { box-shadow: 0 0 25px #ff00ff; }
-            to { box-shadow: 0 0 50px #ff00ff, 0 0 80px rgba(255, 0, 255, 0.7); }
+            from { 
+                box-shadow: 0 0 30px #ff00ff, 0 0 50px rgba(255, 0, 255, 0.5); 
+            }
+            to { 
+                box-shadow: 0 0 50px #ff00ff, 0 0 85px rgba(255, 0, 255, 0.8), 
+                            inset 0 0 30px rgba(255, 0, 255, 0.4); 
+            }
         }
 
-        .neon-cyan { text-shadow: 0 0 20px #00f5ff; }
-
-        #drop-zone {
-            transition: all 0.3s ease;
-        }
-        #drop-zone.dragover {
-            background: rgba(34, 211, 238, 0.15);
-            border-color: #22d3ee;
-            box-shadow: 0 0 40px rgba(34, 211, 238, 0.4);
+        .neon-cyan {
+            text-shadow: 0 0 15px #00f5ff,
+                         0 0 30px #00f5ff;
         }
 
-        .analysis-result {
-            animation: fadeInUp 0.6s ease forwards;
+        .neon-magenta {
+            text-shadow: 0 0 15px #ff00ff,
+                         0 0 30px #ff00ff;
+        }
+
+        .signal-card {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .signal-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        #chart {
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 0 60px rgba(0, 245, 255, 0.15);
+        }
+
+        .market-tab.active {
+            background: linear-gradient(to right, #22d3ee, #a855f7);
+            color: black;
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.6);
+        }
+
+        .drop-zone {
+            transition: all 0.4s ease;
         }
     </style>
 </head>
-<body class="bg-zinc-950 text-slate-200 overflow-hidden">
+<body class="text-slate-200 overflow-hidden">
 
 <div class="flex h-screen">
 
-    <!-- Sidebar (oldin bo‘lgani kabi) -->
-    <div class="w-72 bg-zinc-900 border-r border-slate-800 flex flex-col">
-        <div class="p-6 border-b border-slate-800">
-            <h1 class="title-font text-3xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
-            <p class="text-xs text-emerald-400 mt-1 tracking-widest">ANTIGRAVITY EDITION</p>
+    <!-- Sidebar -->
+    <div class="w-72 bg-zinc-950 border-r border-slate-700 flex flex-col">
+        <div class="p-6 border-b border-slate-700">
+            <h1 class="title-font text-4xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
+            <p class="text-emerald-400 text-xs tracking-[3px] mt-1">ANTIGRAVITY EDITION</p>
         </div>
 
-        <div class="p-4">
-            <div id="market-tabs" class="grid grid-cols-4 gap-2 text-center">
-                <button onclick="switchMarket(0)" data-market="0" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Forex</button>
-                <button onclick="switchMarket(1)" data-market="1" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Crypto</button>
-                <button onclick="switchMarket(2)" data-market="2" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all bg-gradient-to-r from-purple-600 to-pink-600 text-white">Synthetic</button>
-                <button onclick="switchMarket(3)" data-market="3" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Aksiyalar</button>
+        <!-- Market Tabs -->
+        <div class="p-5">
+            <div id="market-tabs" class="grid grid-cols-4 gap-2">
+                <button onclick="switchMarket(0)" data-market="0" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all">Forex</button>
+                <button onclick="switchMarket(1)" data-market="1" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all">Crypto</button>
+                <button onclick="switchMarket(2)" data-market="2" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all active">Synthetic</button>
+                <button onclick="switchMarket(3)" data-market="3" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all">Aksiyalar</button>
             </div>
         </div>
 
-        <div class="px-4">
-            <div class="text-xs text-slate-400 mb-2 px-2">SYMBOLS</div>
+        <!-- Symbols -->
+        <div class="px-5">
+            <div class="text-xs text-slate-400 mb-3 px-1">SYMBOLS</div>
             <div id="symbols-list" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <div class="mt-6 px-4">
-            <div class="flex justify-between items-center mb-3 px-2">
-                <div class="text-xs text-slate-400">STRATEGIES</div>
-                <button onclick="toggleConfluence()" id="confluence-btn" class="text-xs px-5 py-1 rounded-full transition-all">
+        <!-- Strategies -->
+        <div class="mt-8 px-5">
+            <div class="flex justify-between items-center mb-4 px-1">
+                <div class="text-xs uppercase tracking-widest text-slate-400">STRATEGIES</div>
+                <button onclick="toggleConfluence()" id="confluence-btn"
+                        class="px-5 py-1.5 text-xs rounded-2xl transition-all bg-slate-800 hover:bg-slate-700">
                     <span id="confluence-label" class="font-semibold">Confluence OFF</span>
                 </button>
             </div>
             <div id="strategy-list" class="space-y-3"></div>
         </div>
 
-        <div class="mt-auto p-4 border-t border-slate-800">
-            <button onclick="toggleLanguage()" class="w-full flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm">
-                <i class="fas fa-globe"></i>
+        <div class="mt-auto p-5 border-t border-slate-700">
+            <button onclick="toggleLanguage()" 
+                    class="w-full py-4 bg-slate-900 hover:bg-slate-800 rounded-3xl flex items-center justify-center gap-3 text-sm font-medium">
+                <i class="fas fa-globe text-cyan-400"></i>
                 <span id="current-lang">UZ</span>
             </button>
         </div>
     </div>
 
-    <!-- Main Chart Area -->
+    <!-- Main Content -->
     <div class="flex-1 flex flex-col">
-        <div class="h-16 border-b border-slate-800 bg-zinc-900/90 backdrop-blur flex items-center px-6 justify-between">
-            <div class="flex items-center gap-8">
-                <div class="flex items-center gap-4">
-                    <span id="current-symbol" class="font-mono text-3xl font-bold"></span>
-                    <span id="current-price" class="font-mono text-4xl font-bold text-emerald-400">1248.65</span>
+        <!-- Top Bar -->
+        <div class="h-16 border-b border-slate-700 bg-zinc-950/80 backdrop-blur-xl flex items-center px-8 justify-between z-10">
+            <div class="flex items-center gap-10">
+                <div class="flex items-center gap-5">
+                    <span id="current-symbol" class="font-mono text-3xl font-bold text-white"></span>
+                    <span id="current-price" class="font-mono text-4xl font-bold text-emerald-400 neon-cyan"></span>
                 </div>
-                <div id="timeframes" class="flex bg-slate-900 rounded-2xl p-1 text-sm">
-                    <div onclick="changeTimeframe(0)" class="timeframe-btn px-5 py-2 rounded-xl cursor-pointer">M1</div>
-                    <div onclick="changeTimeframe(1)" class="timeframe-btn px-5 py-2 rounded-xl cursor-pointer">M5</div>
-                    <div onclick="changeTimeframe(2)" class="timeframe-btn px-5 py-2 rounded-xl cursor-pointer bg-slate-700">M15</div>
-                    <div onclick="changeTimeframe(3)" class="timeframe-btn px-5 py-2 rounded-xl cursor-pointer">H1</div>
-                    <div onclick="changeTimeframe(4)" class="timeframe-btn px-5 py-2 rounded-xl cursor-pointer">H4</div>
+                <div id="timeframes" class="flex bg-zinc-900 rounded-3xl p-1 shadow-inner">
+                    <div onclick="changeTimeframe(0)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">M1</div>
+                    <div onclick="changeTimeframe(1)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">M5</div>
+                    <div onclick="changeTimeframe(2)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm bg-slate-700">M15</div>
+                    <div onclick="changeTimeframe(3)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">H1</div>
+                    <div onclick="changeTimeframe(4)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">H4</div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
-                <button onclick="scanMarket()" class="flex items-center gap-3 bg-gradient-to-r from-cyan-500 to-violet-600 hover:from-cyan-600 hover:to-violet-700 px-8 py-3 rounded-3xl font-semibold transition-all">
-                    <i class="fas fa-bolt"></i> SCAN MARKET
+            <div class="flex items-center gap-5">
+                <button onclick="scanMarket()" 
+                        class="flex items-center gap-3 bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 px-8 py-3.5 rounded-3xl font-semibold text-sm shadow-lg transition-all active:scale-95">
+                    <i class="fas fa-bolt-lightning"></i>
+                    <span>SCAN MARKET</span>
                 </button>
-                <button onclick="toggleFullScreen()" class="p-4 hover:bg-slate-800 rounded-3xl">
-                    <i class="fas fa-expand-alt"></i>
+                <button onclick="toggleFullScreen()" class="p-4 text-slate-300 hover:text-white hover:bg-slate-800 rounded-3xl transition-all">
+                    <i class="fas fa-expand"></i>
                 </button>
             </div>
         </div>
 
-        <div class="flex-1 p-4 chart-container">
-            <div id="chart" class="w-full h-full rounded-3xl overflow-hidden border border-slate-700"></div>
+        <!-- Chart -->
+        <div class="flex-1 p-6">
+            <div id="chart" class="w-full h-full"></div>
         </div>
 
-        <div class="h-64 border-t border-slate-800 bg-zinc-900/95 p-4">
-            <div class="flex justify-between mb-3">
-                <div class="font-semibold flex items-center gap-2"><i class="fas fa-waveform-lines"></i> LIVE SIGNALS</div>
-                <button onclick="clearLog()" class="text-xs px-4 py-1 text-slate-400 hover:text-red-400">Tozalash</button>
+        <!-- Signal Log -->
+        <div class="h-72 border-t border-slate-700 bg-zinc-950/90 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <div class="uppercase text-xs tracking-widest font-medium flex items-center gap-2">
+                    <i class="fas fa-signal"></i> LIVE SIGNAL STREAM
+                </div>
+                <button onclick="clearLog()" class="text-xs text-red-400 hover:text-red-300">CLEAR LOG</button>
             </div>
-            <div id="signal-log" class="grid grid-cols-3 gap-3 overflow-auto h-full"></div>
+            <div id="signal-log" class="grid grid-cols-3 gap-4 overflow-auto h-full"></div>
         </div>
     </div>
 
     <!-- Right Panel -->
-    <div class="w-96 bg-zinc-900 border-l border-slate-800 flex flex-col">
-        <!-- Demo Account (6-bosqichdan) -->
-        <div class="p-6 border-b border-slate-800">
-            <div class="uppercase text-xs tracking-widest text-slate-400 mb-1">DEMO ACCOUNT</div>
-            <div class="flex justify-between items-end">
+    <div class="w-96 bg-zinc-950 border-l border-slate-700 flex flex-col">
+        <!-- Account -->
+        <div class="p-7 border-b border-slate-700">
+            <div class="text-xs uppercase tracking-[2px] text-slate-400 mb-2">DEMO ACCOUNT</div>
+            <div class="flex justify-between">
                 <div>
-                    <div class="text-4xl font-bold font-mono" id="balance">$12,458.75</div>
-                    <div class="flex items-center gap-2 text-sm">
-                        <span id="equity" class="text-emerald-400">$12,521.40</span>
-                    </div>
+                    <div id="balance" class="text-4xl font-bold font-mono text-white">$12,458.75</div>
+                    <div id="equity" class="text-emerald-400 text-lg font-medium">$12,521.40 <span class="text-xs">(+0.50%)</span></div>
                 </div>
                 <div class="text-right">
-                    <div class="text-xs text-slate-400">Open P/L</div>
+                    <div class="text-xs text-slate-400">OPEN P/L</div>
                     <div id="total-pl" class="text-3xl font-bold text-emerald-400">+$62.65</div>
                 </div>
             </div>
         </div>
 
-        <div class="p-6 border-b border-slate-800">
-            <div class="flex justify-between text-sm mb-2">
-                <span class="text-slate-400">Risk per trade</span>
-                <span id="risk-value" class="font-mono font-bold text-cyan-400">1.8%</span>
+        <!-- Risk -->
+        <div class="p-7 border-b border-slate-700">
+            <div class="flex justify-between mb-3">
+                <span class="text-sm text-slate-400">Risk per trade</span>
+                <span id="risk-value" class="font-mono text-cyan-400 font-bold">1.8%</span>
             </div>
-            <input type="range" id="risk-slider" min="0.1" max="5" step="0.1" value="1.8" 
-                   oninput="updateRisk(this.value)" class="w-full accent-cyan-500">
-            <div class="mt-5 grid grid-cols-2 gap-6">
+            <input type="range" min="0.1" max="5" step="0.1" value="1.8" 
+                   oninput="updateRisk(this.value)" 
+                   class="w-full accent-fuchsia-500">
+            <div class="grid grid-cols-2 gap-8 mt-6">
                 <div>
                     <div class="text-xs text-slate-400">Lot Size</div>
-                    <div id="lot-size" class="text-3xl font-bold font-mono">0.21</div>
+                    <div id="lot-size" class="text-3xl font-bold font-mono text-white">0.21</div>
                 </div>
                 <div>
-                    <div class="text-xs text-slate-400">Risk Amount</div>
+                    <div class="text-xs text-slate-400">Est. Risk</div>
                     <div id="est-risk" class="text-3xl font-bold font-mono text-amber-400">$224.26</div>
                 </div>
             </div>
         </div>
 
-        <div class="flex-1 flex flex-col min-h-0">
-            <div class="px-6 py-4 bg-zinc-950 border-b border-slate-800 flex justify-between">
+        <!-- Positions -->
+        <div class="flex-1 flex flex-col">
+            <div class="px-7 py-5 border-b border-slate-700 bg-zinc-900 flex justify-between items-center">
                 <div class="font-semibold">OPEN POSITIONS</div>
-                <span id="positions-count" class="bg-slate-800 px-4 py-1 rounded-full text-xs">0</span>
+                <span id="positions-count" class="bg-slate-800 px-5 py-1 rounded-2xl text-xs">0</span>
             </div>
-            <div id="positions-list" class="flex-1 overflow-auto p-4 space-y-4"></div>
+            <div id="positions-list" class="flex-1 overflow-auto p-6 space-y-4"></div>
         </div>
 
-        <!-- Neural Vision Analyzer - 7-BOSQICH -->
-        <div class="border-t border-slate-800 p-6 bg-zinc-950">
-            <div class="text-xs uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2">
-                <i class="fas fa-brain"></i> NEURAL VISION ANALYZER
+        <!-- Neural Vision -->
+        <div class="p-7 border-t border-slate-700 bg-zinc-950">
+            <div class="uppercase text-xs tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                <i class="fas fa-brain text-violet-400"></i> NEURAL VISION
             </div>
-            
             <div id="drop-zone" 
-                 class="glass border-2 border-dashed border-slate-600 rounded-3xl h-52 flex flex-col items-center justify-center text-center p-6 cursor-pointer hover:border-cyan-400 transition-all">
-                <i class="fas fa-cloud-upload-alt text-5xl text-slate-400 mb-4"></i>
-                <p class="font-medium">Screenshot yuklang yoki shu yerga torting</p>
-                <p class="text-xs text-slate-500 mt-1">PNG, JPG, WEBP (maks 5MB)</p>
+                 class="drop-zone glass border-2 border-dashed border-slate-600 hover:border-violet-400 rounded-3xl h-52 flex flex-col items-center justify-center cursor-pointer">
+                <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
+                <p class="font-medium text-center">Screenshot yuklang<br> yoki shu yerga torting</p>
                 <input type="file" id="screenshot-input" accept="image/*" class="hidden">
             </div>
-
-            <div id="analysis-result" class="hidden mt-4 analysis-result"></div>
+            <div id="analysis-result" class="hidden mt-6"></div>
         </div>
     </div>
 </div>
 
 <script>
-// ==================== 7-BOSQICH: NEURAL VISION ANALYZER + OLDINGI HAMMASI ====================
+// ==================== 8-BOSQICH: DIZAYN POLISHING + OLDINGI HAMMASI ====================
 
 let chart = null;
 let candleSeries = null;
@@ -225,7 +268,7 @@ function createChart() {
         layout: { background: { color: '#0a0f1c' }, textColor: '#94a3b8' },
         grid: { vertLines: { color: '#1e2937' }, horzLines: { color: '#1e2937' } },
         crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-        timeScale: { timeVisible: true }
+        timeScale: { timeVisible: true, borderColor: '#334155' }
     });
     candleSeries = chart.addCandlestickSeries({
         upColor: '#22c55e', downColor: '#ef4444',
@@ -287,35 +330,32 @@ function updateLivePrice() {
     setInterval(() => {
         price += (Math.random() - 0.47) * (currentMarket === 2 ? 14 : 80);
         priceEl.textContent = price.toFixed(currentMarket === 2 ? 2 : 0);
-    }, 1800);
+    }, 1700);
 }
 
-// ... (switchMarket, updateSymbols, renderStrategies, toggleStrategy, toggleConfluence, updateRisk, renderPositions, closePosition, closeAllPositions, renderTradeHistory, updateEquity, addToLog, takePosition, addRandomSignal, scanMarket, clearLog, changeTimeframe, toggleLanguage, toggleFullScreen funksiyalari oldingi 6-bosqichdagidek qoldi)
-
-function switchMarket(index) { /* oldingi kod */ 
+function switchMarket(index) {
     currentMarket = index;
-    document.querySelectorAll('#market-tabs button').forEach(btn => {
-        const active = parseInt(btn.dataset.market) === index;
-        btn.classList.toggle('bg-gradient-to-r', active);
-        btn.classList.toggle('from-purple-600', active);
-        btn.classList.toggle('to-pink-600', active);
-        btn.classList.toggle('text-white', active);
-    });
+    document.querySelectorAll('#market-tabs button').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`#market-tabs button[data-market="${index}"]`).classList.add('active');
     currentSymbol = symbolsByMarket[index][0];
     document.getElementById('current-symbol').textContent = currentSymbol;
     renderChart();
     updateSymbols();
 }
 
-function updateSymbols() { /* oldingi kod */ 
+function updateSymbols() {
     const container = document.getElementById('symbols-list');
     container.innerHTML = '';
     symbolsByMarket[currentMarket].forEach(sym => {
         const active = sym === currentSymbol;
         const btn = document.createElement('button');
-        btn.className = `px-6 py-2.5 text-sm font-mono rounded-2xl transition-all ${active ? 'bg-cyan-500 text-black font-bold' : 'bg-slate-800 hover:bg-slate-700'}`;
+        btn.className = `px-6 py-3 text-sm font-mono rounded-2xl transition-all ${active ? 'bg-gradient-to-r from-cyan-400 to-violet-400 text-black font-bold shadow-lg' : 'bg-slate-900 hover:bg-slate-800'}`;
         btn.textContent = sym;
-        btn.onclick = () => { currentSymbol = sym; document.getElementById('current-symbol').textContent = sym; renderChart(); };
+        btn.onclick = () => {
+            currentSymbol = sym;
+            document.getElementById('current-symbol').textContent = sym;
+            renderChart();
+        };
         container.appendChild(btn);
     });
 }
@@ -323,31 +363,33 @@ function updateSymbols() { /* oldingi kod */
 function renderStrategies() {
     const container = document.getElementById('strategy-list');
     container.innerHTML = `
-        <div onclick="toggleStrategy(this)" class="razgon-glow flex justify-between items-center bg-slate-800/80 p-5 rounded-3xl cursor-pointer border border-purple-500/40">
+        <div onclick="toggleStrategy(this)" class="razgon-glow flex justify-between items-center bg-slate-900 p-5 rounded-3xl cursor-pointer border border-fuchsia-500/30">
             <div class="flex items-center gap-4"><span class="text-4xl">⚡</span><span class="font-semibold">Razgon Strategy</span></div>
-            <span class="text-emerald-400 text-sm font-bold">ON</span>
+            <span class="text-emerald-400 text-sm font-bold">ACTIVE</span>
         </div>
-        <div onclick="toggleStrategy(this)" class="flex justify-between items-center bg-slate-800/70 hover:bg-slate-700 p-5 rounded-3xl cursor-pointer">
+        <div onclick="toggleStrategy(this)" class="flex justify-between items-center bg-slate-900 hover:bg-slate-800 p-5 rounded-3xl cursor-pointer">
             <div class="flex items-center gap-4"><span class="text-4xl">📍</span><span>ICT Order Blocks</span></div>
             <span class="text-emerald-400 text-sm">ON</span>
         </div>
-        <div onclick="toggleStrategy(this)" class="flex justify-between items-center bg-slate-800/70 hover:bg-slate-700 p-5 rounded-3xl cursor-pointer">
+        <div onclick="toggleStrategy(this)" class="flex justify-between items-center bg-slate-900 hover:bg-slate-800 p-5 rounded-3xl cursor-pointer">
             <div class="flex items-center gap-4"><span class="text-4xl">📈</span><span>EMA Cross</span></div>
             <span class="text-emerald-400 text-sm">ON</span>
         </div>
     `;
 }
 
-function toggleStrategy(el) { el.classList.toggle('!bg-emerald-900/50'); }
+function toggleStrategy(el) {
+    el.classList.toggle('!bg-emerald-900/60');
+}
+
 function toggleConfluence() {
     isConfluence = !isConfluence;
     const label = document.getElementById('confluence-label');
     label.textContent = isConfluence ? "Confluence ON" : "Confluence OFF";
-    label.parentElement.classList.toggle('bg-emerald-600/80', isConfluence);
+    label.parentElement.classList.toggle('bg-emerald-600', isConfluence);
     renderChart();
 }
 
-// Risk, Positions, Trade History funksiyalari (oldingi 6-bosqichdan)
 function updateRisk(val) {
     document.getElementById('risk-value').textContent = parseFloat(val).toFixed(1) + '%';
     const riskAmount = balance * (parseFloat(val) / 100);
@@ -356,226 +398,194 @@ function updateRisk(val) {
     document.getElementById('est-risk').textContent = '$' + riskAmount.toFixed(2);
 }
 
-function renderPositions() { /* oldingi kod */ 
+function renderPositions() {
     const container = document.getElementById('positions-list');
     container.innerHTML = positions.length === 0 ? 
-        `<div class="text-center py-12 text-slate-500">Ochiq pozitsiyalar yo‘q</div>` : '';
-    // ... (to‘liq kod oldingi versiyada bor)
+        `<div class="text-center py-16 text-slate-500">Hozircha ochiq pozitsiya yo‘q</div>` : '';
+
+    positions.forEach((pos, i) => {
+        const div = document.createElement('div');
+        div.className = `glass rounded-3xl p-5 signal-card`;
+        div.innerHTML = `
+            <div class="flex justify-between">
+                <span class="font-mono">${pos.symbol}</span>
+                <span class="${pos.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'} font-bold">${pos.type}</span>
+            </div>
+            <div class="text-xs mt-3 flex justify-between text-slate-400">
+                <span>${pos.lot} lot</span>
+                <span class="${pos.pl >= 0 ? 'text-emerald-400' : 'text-red-400'}">$${pos.pl}</span>
+            </div>
+            <button onclick="closePosition(${i})" class="mt-4 w-full py-2 text-xs bg-red-500/80 hover:bg-red-600 rounded-2xl">YOPISH</button>
+        `;
+        container.appendChild(div);
+    });
     document.getElementById('positions-count').textContent = positions.length;
 }
 
-function closePosition(index) { /* oldingi kod */ 
-    if (!confirm("Pozitsiyani yopish?")) return;
+function closePosition(index) {
+    if (!confirm("Pozitsiyani yopishni xohlaysizmi?")) return;
     const pos = positions.splice(index, 1)[0];
     balance += pos.pl;
     document.getElementById('balance').textContent = '$' + balance.toFixed(2);
-    tradeHistory.unshift({...pos, closeTime: new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}), status: pos.pl >= 0 ? 'WIN' : 'LOSS'});
     renderPositions();
-    renderTradeHistory();
     updateEquity();
 }
 
-function closeAllPositions() { /* oldingi kod */ 
-    if (positions.length === 0 || !confirm("Barchasini yopish?")) return;
-    let totalPL = positions.reduce((sum, p) => sum + p.pl, 0);
-    balance += totalPL;
+function closeAllPositions() {
+    if (positions.length === 0 || !confirm("Barcha pozitsiyalarni yopish?")) return;
+    let total = positions.reduce((a, b) => a + b.pl, 0);
+    balance += total;
     document.getElementById('balance').textContent = '$' + balance.toFixed(2);
-    positions.forEach(pos => tradeHistory.unshift({...pos, closeTime: new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}), status: pos.pl >= 0 ? 'WIN' : 'LOSS'}));
     positions = [];
     renderPositions();
-    renderTradeHistory();
     updateEquity();
-}
-
-function renderTradeHistory() {
-    const container = document.getElementById('trade-history') || document.createElement('div'); // agar bo‘lmasa
-    // (oldingi versiyada bor edi, bu yerda qisqa qoldirilgan)
 }
 
 function updateEquity() {
-    const openPL = positions.reduce((sum, pos) => sum + pos.pl, 0);
+    const openPL = positions.reduce((sum, p) => sum + p.pl, 0);
     equity = balance + openPL;
-    document.getElementById('equity').textContent = '$' + equity.toFixed(2);
+    document.getElementById('equity').innerHTML = `$${equity.toFixed(2)} <span class="text-xs text-emerald-400">(+0.50%)</span>`;
     document.getElementById('total-pl').textContent = (openPL >= 0 ? '+' : '') + '$' + openPL.toFixed(2);
-    document.getElementById('total-pl').className = openPL >= 0 ? 'text-3xl font-bold text-emerald-400' : 'text-3xl font-bold text-red-400';
+    document.getElementById('total-pl').className = openPL >= 0 ? "text-3xl font-bold text-emerald-400" : "text-3xl font-bold text-red-400";
 }
 
 function addToLog(signal) {
     const container = document.getElementById('signal-log');
     const div = document.createElement('div');
-    div.className = `glass p-4 rounded-3xl flex gap-4 ${signal.isBuy ? 'border-l-4 border-emerald-400' : 'border-l-4 border-red-400'}`;
+    div.className = `glass p-5 rounded-3xl signal-card ${signal.isBuy ? 'border-l-4 border-emerald-400' : 'border-l-4 border-red-400'}`;
     div.innerHTML = `
-        <div class="text-4xl">${signal.emoji}</div>
-        <div>
-            <div class="font-semibold">${signal.name}</div>
-            <div class="text-xs text-slate-400">${signal.symbol} • M15</div>
-            <div class="text-cyan-400">${signal.confluence}% confluence</div>
+        <div class="flex gap-4">
+            <div class="text-4xl">${signal.emoji}</div>
+            <div class="flex-1">
+                <div class="font-semibold text-base">${signal.name}</div>
+                <div class="text-xs text-slate-400">${signal.symbol} • M15</div>
+                <div class="text-cyan-400 font-medium">${signal.confluence}% confluence</div>
+            </div>
         </div>
     `;
     container.prepend(div);
-    if (container.children.length > 12) container.removeChild(container.lastChild);
+    if (container.children.length > 9) container.removeChild(container.lastChild);
 }
 
 function takePosition(signal) {
-    const lot = parseFloat(document.getElementById('lot-size').textContent);
-    const entry = parseFloat(document.getElementById('current-price').textContent);
-    const pl = (Math.random() * 520 - 120).toFixed(2);
-
-    const position = {
-        id: Date.now(),
+    const lot = parseFloat(document.getElementById('lot-size').textContent) || 0.21;
+    const pl = (Math.random() * 480 - 90).toFixed(2);
+    positions.unshift({
         symbol: currentSymbol,
         type: signal.isBuy ? 'BUY' : 'SELL',
         lot: lot,
-        entry: entry,
-        pl: parseFloat(pl),
-        time: new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'})
-    };
-
-    positions.unshift(position);
+        pl: parseFloat(pl)
+    });
     renderPositions();
     updateEquity();
-
-    tradeHistory.unshift({...position, closeTime: new Date().toLocaleTimeString('ru-RU', {hour:'2-digit', minute:'2-digit'}), status: parseFloat(pl) > 0 ? 'WIN' : 'LOSS'});
 }
 
 function addRandomSignal() {
-    const isBuy = Math.random() > 0.48;
-    const strats = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB", "Bollinger"];
-    const name = strats[Math.floor(Math.random() * strats.length)];
+    const isBuy = Math.random() > 0.45;
+    const names = ["RAZGON", "ICT Order Block", "EMA 9/21 Cross", "SMC Liquidity Grab", "Bollinger Squeeze"];
+    const name = names[Math.floor(Math.random() * names.length)];
 
     const signal = {
         emoji: isBuy ? '⬆️' : '⬇️',
         name: `${name} ${isBuy ? 'BUY' : 'SELL'}`,
         symbol: currentSymbol,
-        confluence: isConfluence ? 92 + Math.floor(Math.random()*7) : 76 + Math.floor(Math.random()*18),
+        confluence: isConfluence ? 91 + Math.floor(Math.random() * 8) : 74 + Math.floor(Math.random() * 20),
         isBuy: isBuy
     };
 
-    if (isConfluence && signal.confluence < 89) return;
+    if (isConfluence && signal.confluence < 88) return;
 
     addToLog(signal);
-    if (Math.random() > 0.35) takePosition(signal);
+    if (Math.random() > 0.4) takePosition(signal);
 }
 
 function scanMarket() {
     const btn = document.querySelector('button[onclick="scanMarket()"]');
     const orig = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> SCANNING...`;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>SCANNING...`;
     btn.disabled = true;
     setTimeout(() => {
         renderChart();
-        for (let i = 0; i < 3; i++) addRandomSignal();
+        for (let i = 0; i < 4; i++) addRandomSignal();
         btn.innerHTML = orig;
         btn.disabled = false;
-    }, 1100);
+    }, 900);
 }
 
-// ==================== NEURAL VISION ANALYZER (7-BOSQICH YANGI) ====================
+function clearLog() {
+    document.getElementById('signal-log').innerHTML = '';
+}
 
-const dropZone = document.getElementById('drop-zone');
-const fileInput = document.getElementById('screenshot-input');
-const analysisResult = document.getElementById('analysis-result');
-
-dropZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', (e) => handleFile(e.target.files[0]));
-
-dropZone.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    dropZone.classList.add('dragover');
-});
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
-dropZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    dropZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length > 0) handleFile(e.dataTransfer.files[0]);
-});
-
+// Neural Vision (7-bosqichdan)
 function handleFile(file) {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-        alert("Faqat rasm fayllarini yuklang!");
-        return;
-    }
-
-    dropZone.innerHTML = `<i class="fas fa-spinner fa-spin text-5xl text-cyan-400"></i><p class="mt-4">Neural tahlil qilinmoqda...</p>`;
-
-    setTimeout(() => {
-        showAnalysisResult();
-    }, 1450);
+    if (!file || !file.type.startsWith('image/')) return alert("Faqat rasm faylini yuklang!");
+    const dropZone = document.getElementById('drop-zone');
+    dropZone.innerHTML = `<i class="fas fa-spinner fa-spin text-6xl text-violet-400"></i><p class="mt-6">AI tahlil qilinmoqda...</p>`;
+    setTimeout(showAnalysisResult, 1600);
 }
 
 function showAnalysisResult() {
-    dropZone.classList.add('hidden');
-
-    const strategiesDetected = ["RAZGON", "ICT Order Block", "EMA Cross"];
-    const confidence = 94 + Math.floor(Math.random() * 5);
-    const verdict = Math.random() > 0.4 ? "STRONG BUY" : "STRONG SELL";
-    const color = verdict.includes("BUY") ? "emerald" : "red";
-
-    analysisResult.classList.remove('hidden');
-    analysisResult.innerHTML = `
-        <div class="glass rounded-3xl p-6 analysis-result">
-            <div class="flex justify-between items-start">
-                <div>
-                    <div class="text-emerald-400 text-sm font-bold tracking-widest">NEURAL VISION RESULT</div>
-                    <div class="text-5xl font-bold mt-2 ${color === 'emerald' ? 'text-emerald-400' : 'text-red-400'}">${verdict}</div>
-                </div>
-                <div class="text-right">
-                    <div class="text-6xl font-mono font-bold text-cyan-400">${confidence}%</div>
-                    <div class="text-xs text-slate-400">CONFIDENCE</div>
-                </div>
-            </div>
-            
-            <div class="mt-6">
-                <div class="text-xs text-slate-400 mb-2">DETECTED STRATEGIES</div>
-                <div class="flex flex-wrap gap-2">
-                    ${strategiesDetected.map(s => `<span class="px-4 py-2 bg-slate-800 rounded-2xl text-sm">${s}</span>`).join('')}
-                </div>
-            </div>
-
-            <div class="mt-8 flex gap-3">
-                <button onclick="executeTradeFromAnalysis()" 
-                        class="flex-1 py-4 bg-gradient-to-r from-cyan-500 to-emerald-500 rounded-3xl font-bold text-lg">
-                    TRADE OCHISH
-                </button>
-                <button onclick="resetAnalyzer()" 
-                        class="flex-1 py-4 bg-slate-700 hover:bg-slate-600 rounded-3xl font-bold">
-                    YANA TAHLIL QILISH
-                </button>
+    document.getElementById('drop-zone').classList.add('hidden');
+    const resultDiv = document.getElementById('analysis-result');
+    resultDiv.classList.remove('hidden');
+    resultDiv.innerHTML = `
+        <div class="glass rounded-3xl p-7 text-center">
+            <div class="text-violet-400 text-sm font-bold">NEURAL VISION DETECTED</div>
+            <div class="text-6xl font-bold mt-4 text-emerald-400">STRONG BUY</div>
+            <div class="text-7xl font-mono text-cyan-400 my-6">96%</div>
+            <div class="text-slate-300">RAZGON + ICT + EMA Confluence</div>
+            <div class="mt-8 flex gap-4">
+                <button onclick="executeTradeFromAnalysis()" class="flex-1 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 rounded-3xl font-bold">TRADE OCHISH</button>
+                <button onclick="resetAnalyzer()" class="flex-1 py-4 bg-slate-700 rounded-3xl font-bold">YANA YUKLASH</button>
             </div>
         </div>
     `;
-
-    // Analyzer topgan signalni chartga qo‘shish
-    if (Math.random() > 0.3) {
-        const fakeSignal = {
-            emoji: verdict.includes("BUY") ? '⬆️' : '⬇️',
-            name: `NEURAL ${verdict}`,
-            symbol: currentSymbol,
-            confluence: confidence,
-            isBuy: verdict.includes("BUY")
-        };
-        addToLog(fakeSignal);
-        if (Math.random() > 0.4) takePosition(fakeSignal);
-    }
 }
 
 function executeTradeFromAnalysis() {
-    alert("✅ Neural Signal bo‘yicha demo trade ochildi!\nLot: 0.28 | Risk: 2.1%");
+    alert("Neural Signal bo‘yicha trade ochildi!");
     addRandomSignal();
 }
 
 function resetAnalyzer() {
-    analysisResult.classList.add('hidden');
-    dropZone.classList.remove('hidden');
-    dropZone.innerHTML = `
-        <i class="fas fa-cloud-upload-alt text-5xl text-slate-400 mb-4"></i>
-        <p class="font-medium">Screenshot yuklang yoki shu yerga torting</p>
-        <p class="text-xs text-slate-500 mt-1">PNG, JPG, WEBP (maks 5MB)</p>
+    document.getElementById('analysis-result').classList.add('hidden');
+    document.getElementById('drop-zone').classList.remove('hidden');
+    document.getElementById('drop-zone').innerHTML = `
+        <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
+        <p class="font-medium text-center">Screenshot yuklang<br>yoki shu yerga torting</p>
     `;
 }
 
-// Initialize
+// Drag & Drop
+const dropZone = document.getElementById('drop-zone');
+const fileInput = document.getElementById('screenshot-input');
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', e => e.target.files[0] && handleFile(e.target.files[0]));
+
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#a855f7'; });
+dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#475569');
+dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.style.borderColor = '#475569';
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+});
+
+function changeTimeframe(tf) {
+    currentTimeframe = tf;
+    document.querySelectorAll('.timeframe-btn').forEach((el, i) => el.classList.toggle('bg-slate-700', i === tf));
+    renderChart();
+}
+
+function toggleLanguage() {
+    language = language === 'uz' ? 'en' : 'uz';
+    document.getElementById('current-lang').textContent = language.toUpperCase();
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+}
+
 function initializeApp() {
     createChart();
     renderChart();
@@ -587,11 +597,11 @@ function initializeApp() {
     document.getElementById('current-symbol').textContent = currentSymbol;
 
     updateLivePrice();
-    setTimeout(addRandomSignal, 800);
-    setTimeout(addRandomSignal, 1600);
-    setTimeout(addRandomSignal, 2400);
+    setTimeout(() => addRandomSignal(), 600);
+    setTimeout(() => addRandomSignal(), 1400);
+    setTimeout(() => addRandomSignal(), 2200);
 
-    console.log('%c7-BOSQICH TUGADI! Neural Vision Screenshot Analyzer to‘liq ishga tushdi.', 'color:#00f5ff; font-size:16px; font-weight:bold');
+    console.log('%c8-BOSQICH TUGADI — Dizayn to‘liq polished! Neon, glow va premium ko‘rinish qo‘shildi.', 'color:#ff00ff; font-size:16px; font-weight:bold');
 }
 
 window.onload = initializeApp;
