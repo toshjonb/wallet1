@@ -12,29 +12,26 @@
 </head>
 <body class="bg-zinc-950 text-slate-200 min-h-screen overflow-hidden">
     <div class="flex h-screen">
+
         <!-- Sidebar -->
         <div class="w-72 glass border-r border-slate-700 flex flex-col">
             <div class="p-6 border-b border-slate-700">
                 <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 bg-gradient-to-br from-cyan-400 via-purple-500 to-magenta-500 rounded-2xl flex items-center justify-center text-3xl font-bold shadow-lg">⚡</div>
+                    <div class="w-11 h-11 bg-gradient-to-br from-cyan-400 to-magenta-500 rounded-2xl flex items-center justify-center text-3xl font-bold">⚡</div>
                     <div>
                         <h1 class="text-3xl font-bold tracking-tighter neon-text-cyan">SNIPER</h1>
-                        <p class="text-xs text-slate-400 -mt-1 tracking-widest">ANTIGRAVITY EDITION</p>
+                        <p class="text-xs text-slate-400 -mt-1">ANTIGRAVITY EDITION</p>
                     </div>
                 </div>
             </div>
 
             <!-- Language & Scan -->
             <div class="p-4 flex gap-3">
-                <button onclick="toggleLanguage()" id="lang-btn"
-                    class="flex-1 py-3 px-4 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-medium flex items-center justify-center gap-2 transition-all">
-                    <span id="current-lang">UZ</span>
-                    <i class="fas fa-globe"></i>
+                <button onclick="toggleLanguage()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-medium flex items-center justify-center gap-2">
+                    <span id="current-lang">UZ</span> <i class="fas fa-globe"></i>
                 </button>
-                <button onclick="scanMarket()" 
-                    class="flex-1 py-3 px-4 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2 transition-all">
-                    <i class="fas fa-bolt"></i>
-                    <span id="scan-text">Bozorni skanerlash</span>
+                <button onclick="scanMarket()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2">
+                    <i class="fas fa-bolt"></i> <span id="scan-text">Bozorni skanerlash</span>
                 </button>
             </div>
 
@@ -56,85 +53,64 @@
             </div>
 
             <!-- Strategies -->
-            <div class="flex-1 overflow-auto px-4 mt-6">
-                <div class="flex items-center justify-between mb-4 px-2">
+            <div class="flex-1 px-4 mt-6 overflow-auto">
+                <div class="flex justify-between mb-4 px-2">
                     <div class="text-xs uppercase tracking-widest text-slate-500">Strategiyalar</div>
                     <label class="relative inline-flex items-center cursor-pointer">
                         <input type="checkbox" id="confluence-toggle" onchange="toggleConfluence()" class="sr-only peer">
-                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-cyan-400 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
-                        <span class="ml-3 text-xs font-medium text-slate-300" id="confluence-label">Confluence</span>
+                        <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none peer-focus:ring-cyan-500 rounded-full peer peer-checked:bg-emerald-500"></div>
+                        <span class="ml-2 text-xs" id="confluence-label">Confluence</span>
                     </label>
                 </div>
-                <div class="space-y-2" id="strategy-list"></div>
+                <div id="strategy-list" class="space-y-2"></div>
             </div>
 
-            <div class="p-4 border-t border-slate-700 text-center text-xs text-slate-500">
+            <div class="p-4 text-center text-xs text-slate-500 border-t border-slate-700">
                 99% signal aniqligi • Mock Demo
             </div>
         </div>
 
-        <!-- Main Area -->
+        <!-- Main Content -->
         <div class="flex-1 flex flex-col">
-            <!-- Top Bar -->
-            <div class="h-16 glass border-b border-slate-700 flex items-center px-6 justify-between">
-                <div class="flex items-center gap-6">
-                    <div class="flex items-center gap-3">
-                        <span id="current-symbol" class="text-3xl font-mono font-bold text-white">Volatility 75</span>
-                        <span id="current-price" class="text-emerald-400 text-2xl font-mono">1256.34</span>
-                        <span id="price-change" class="text-emerald-400 text-sm font-medium">+0.87%</span>
-                    </div>
-
-                    <div class="flex items-center gap-2 text-sm font-medium" id="timeframes">
-                        <div onclick="changeTimeframe(0)" class="timeframe-btn px-4 py-1 rounded-xl cursor-pointer" data-tf="0">1m</div>
-                        <div onclick="changeTimeframe(1)" class="timeframe-btn px-4 py-1 rounded-xl cursor-pointer" data-tf="1">5m</div>
-                        <div onclick="changeTimeframe(2)" class="timeframe-btn active px-4 py-1 rounded-xl cursor-pointer" data-tf="2">15m</div>
-                        <div onclick="changeTimeframe(3)" class="timeframe-btn px-4 py-1 rounded-xl cursor-pointer" data-tf="3">1H</div>
-                        <div onclick="changeTimeframe(4)" class="timeframe-btn px-4 py-1 rounded-xl cursor-pointer" data-tf="4">4H</div>
-                    </div>
+            <div class="h-16 glass border-b border-slate-700 flex items-center px-6">
+                <div class="flex items-center gap-4 flex-1">
+                    <span id="current-symbol" class="text-3xl font-mono font-bold">Volatility 75</span>
+                    <span id="current-price" class="text-2xl font-mono text-emerald-400">1256.340</span>
+                    <span id="price-change" class="text-emerald-400 text-sm">+0.87%</span>
                 </div>
 
-                <div class="flex items-center gap-4">
-                    <div class="flex items-center gap-2 bg-slate-900 px-5 py-2 rounded-3xl text-xs">
-                        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-                        <span>LIVE • Antigravity Mode</span>
-                    </div>
-                    <button onclick="toggleFullScreen()" class="px-6 py-2 bg-slate-800 hover:bg-slate-700 rounded-2xl transition-all">
-                        <i class="fas fa-expand"></i>
-                    </button>
+                <div class="flex gap-2" id="timeframes">
+                    <div onclick="changeTimeframe(0)" class="timeframe-btn px-4 py-1.5 rounded-xl text-sm cursor-pointer" data-tf="0">1m</div>
+                    <div onclick="changeTimeframe(1)" class="timeframe-btn px-4 py-1.5 rounded-xl text-sm cursor-pointer" data-tf="1">5m</div>
+                    <div onclick="changeTimeframe(2)" class="timeframe-btn active px-4 py-1.5 rounded-xl text-sm cursor-pointer" data-tf="2">15m</div>
+                    <div onclick="changeTimeframe(3)" class="timeframe-btn px-4 py-1.5 rounded-xl text-sm cursor-pointer" data-tf="3">1H</div>
+                    <div onclick="changeTimeframe(4)" class="timeframe-btn px-4 py-1.5 rounded-xl text-sm cursor-pointer" data-tf="4">4H</div>
                 </div>
+
+                <button onclick="toggleFullScreen()" class="ml-6 px-5 py-2 bg-slate-800 rounded-2xl">
+                    <i class="fas fa-expand"></i>
+                </button>
             </div>
 
             <!-- Chart -->
-            <div class="flex-1 p-4 bg-zinc-950" id="chart-wrapper">
-                <div id="chart" class="w-full h-full rounded-3xl overflow-hidden border border-slate-700 shadow-2xl"></div>
+            <div class="flex-1 p-4" id="chart-wrapper">
+                <div id="chart" class="w-full h-full rounded-3xl border border-slate-700 overflow-hidden"></div>
             </div>
 
-            <!-- Bottom Neural Analyzer -->
-            <div class="h-80 glass border-t border-slate-700 flex">
-                <div class="flex-1 flex flex-col">
-                    <div class="px-6 py-4 border-b border-slate-700 flex items-center justify-between bg-slate-900/50">
-                        <div class="flex items-center gap-3">
-                            <i class="fas fa-brain text-cyan-400"></i>
-                            <span class="font-semibold">Neural Vision Screenshot Analyzer</span>
-                        </div>
+            <!-- Neural Analyzer -->
+            <div class="h-72 glass border-t border-slate-700 flex">
+                <div id="drop-zone" class="flex-1 flex flex-col items-center justify-center border-r border-slate-700 cursor-pointer hover:bg-slate-900/50"
+                     onclick="document.getElementById('image-upload').click()">
+                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="analyzeScreenshot(event)">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-3"></i>
+                    <p class="text-slate-300">Screenshot yuklang</p>
+                </div>
+                <div class="flex-1 p-6" id="analysis-result">
+                    <div id="analysis-placeholder" class="text-center py-16 text-slate-400">
+                        <i class="fas fa-brain text-6xl mb-4 opacity-40"></i>
+                        <p>AI tahlili shu yerda chiqadi</p>
                     </div>
-                    <div class="flex-1 flex">
-                        <div id="drop-zone" 
-                             class="flex-1 flex flex-col items-center justify-center border-r border-slate-700 hover:bg-slate-900/30 transition-colors cursor-pointer"
-                             onclick="document.getElementById('image-upload').click()">
-                            <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="analyzeScreenshot(event)">
-                            <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
-                            <p class="text-slate-300">Screenshotni yuklang</p>
-                            <p class="text-xs text-slate-500 mt-1">yoki bu yerga torting</p>
-                        </div>
-                        <div class="flex-1 p-6 overflow-auto" id="analysis-result">
-                            <div id="analysis-placeholder" class="text-center text-slate-400 py-20">
-                                <i class="fas fa-chart-line text-6xl mb-6 opacity-40"></i>
-                                <p>AI tahlili natijasi shu yerda paydo bo‘ladi</p>
-                            </div>
-                            <div id="analysis-content" class="hidden"></div>
-                        </div>
-                    </div>
+                    <div id="analysis-content" class="hidden"></div>
                 </div>
             </div>
         </div>
@@ -142,52 +118,32 @@
         <!-- Right Panel -->
         <div class="w-80 glass border-l border-slate-700 flex flex-col">
             <div class="p-6">
-                <h2 class="text-xl font-semibold mb-1">Demo Hisob</h2>
-                <div class="flex justify-between">
-                    <div>
-                        <div id="balance" class="text-4xl font-mono font-bold text-emerald-400">12,458.75</div>
-                        <div class="text-xs text-slate-400">USD</div>
-                    </div>
-                    <div class="text-right">
-                        <div id="equity" class="text-emerald-400">12,487.20</div>
-                        <div class="text-xs text-slate-400">Equity</div>
-                    </div>
-                </div>
+                <h2 class="font-semibold text-lg">Demo Hisob</h2>
+                <div id="balance" class="text-4xl font-mono font-bold text-emerald-400">12458.75</div>
             </div>
 
             <div class="px-6">
                 <div class="bg-slate-900 rounded-3xl p-6">
-                    <div class="flex justify-between text-sm mb-4">
+                    <div class="flex justify-between mb-4">
                         <span class="text-slate-400">Risk %</span>
                         <span id="risk-value" class="font-mono">0.5</span>
                     </div>
-                    <input type="range" min="0.1" max="5" step="0.1" value="0.5" id="risk-slider"
-                        class="w-full accent-cyan-400" oninput="updateRisk(this.value)">
-                    
-                    <div class="grid grid-cols-2 gap-6 mt-8 text-sm">
-                        <div>
-                            <div class="text-slate-400 text-xs">Lot hajmi</div>
-                            <div id="lot-size" class="font-mono text-2xl">0.62</div>
-                        </div>
-                        <div>
-                            <div class="text-slate-400 text-xs">Open P/L</div>
-                            <div id="open-pl" class="font-mono text-emerald-400 text-2xl">+128.40</div>
-                        </div>
-                    </div>
+                    <input type="range" id="risk-slider" min="0.1" max="5" step="0.1" value="0.5" 
+                           class="w-full accent-cyan-400" oninput="updateRisk(this.value)">
                 </div>
             </div>
 
-            <div class="flex-1 px-6 mt-6 overflow-auto">
-                <div class="text-xs uppercase tracking-widest text-slate-500 mb-3">Ochiq pozitsiyalar</div>
+            <div class="flex-1 px-6 mt-4 overflow-auto">
+                <div class="text-xs uppercase text-slate-500 mb-3">Ochiq pozitsiyalar</div>
                 <div id="positions-list" class="space-y-3"></div>
             </div>
 
-            <div class="border-t border-slate-700 flex flex-col h-80">
-                <div class="px-6 py-4 bg-slate-900/70 flex justify-between items-center text-xs uppercase tracking-widest text-slate-500">
+            <div class="border-t border-slate-700 h-80 flex flex-col">
+                <div class="px-6 py-4 bg-slate-900/70 text-xs uppercase flex justify-between">
                     <span>Signal Log</span>
-                    <button onclick="clearLog()" class="text-cyan-400 hover:text-white">Tozalash</button>
+                    <button onclick="clearLog()" class="text-cyan-400">Tozalash</button>
                 </div>
-                <div id="signal-log" class="flex-1 overflow-auto p-4 space-y-3 text-sm"></div>
+                <div id="signal-log" class="flex-1 overflow-auto p-4 space-y-3"></div>
             </div>
         </div>
     </div>
