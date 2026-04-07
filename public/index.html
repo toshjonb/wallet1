@@ -7,13 +7,339 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link rel="stylesheet" href="styles.css">
-    <script src="app.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            --neon-cyan: #00f5ff;
+            --neon-magenta: #ff00ff;
+        }
+        
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        
+        .glass {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+        
+        .neon-text-cyan { text-shadow: 0 0 10px #00f5ff, 0 0 20px #00f5ff; }
+        
+        .market-tab.active {
+            border-bottom: 3px solid #00f5ff;
+            color: #00f5ff;
+            background-color: rgba(0, 245, 255, 0.1);
+        }
+        
+        .razgon-glow {
+            animation: razgonPulse 1.5s infinite alternate;
+        }
+        
+        @keyframes razgonPulse {
+            from { text-shadow: 0 0 10px #ff00ff; }
+            to { text-shadow: 0 0 35px #ff00ff, 0 0 55px #ff00ff; }
+        }
+        
+        .timeframe-btn.active {
+            background-color: #22d3ee;
+            color: black;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="bg-zinc-950 text-slate-200 min-h-screen overflow-hidden">
     <div class="flex h-screen">
-        <!-- Sidebar va boshqa qismlar app.js orqali to'ldiriladi yoki eski struktura saqlanadi -->
-        <!-- To'liq ishlaydigan versiya uchun eski struktura + app.js ni saqlaymiz -->
+
+        <!-- SIDEBAR -->
+        <div class="w-72 glass border-r border-slate-700 flex flex-col">
+            <div class="p-6 border-b border-slate-700">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 bg-gradient-to-br from-cyan-400 to-magenta-500 rounded-2xl flex items-center justify-center text-3xl">⚡</div>
+                    <div>
+                        <h1 class="text-3xl font-bold tracking-tighter neon-text-cyan">SNIPER</h1>
+                        <p class="text-xs text-slate-400">ANTIGRAVITY EDITION</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 flex gap-2">
+                <button onclick="toggleLanguage()" class="flex-1 py-3 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-medium flex items-center justify-center gap-2">
+                    <span id="current-lang">UZ</span> <i class="fas fa-globe"></i>
+                </button>
+                <button onclick="scanMarket()" class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 rounded-2xl text-sm font-semibold flex items-center justify-center gap-2">
+                    <i class="fas fa-bolt"></i> <span id="scan-text">Bozorni skanerlash</span>
+                </button>
+            </div>
+
+            <div class="px-4">
+                <div class="text-xs uppercase tracking-widest text-slate-500 mb-2">Bozorlar</div>
+                <div class="grid grid-cols-2 gap-2" id="market-tabs">
+                    <button onclick="switchMarket(0)" class="market-tab active py-3 px-4 rounded-2xl text-sm" data-market="0">Forex</button>
+                    <button onclick="switchMarket(1)" class="market-tab py-3 px-4 rounded-2xl text-sm" data-market="1">Crypto</button>
+                    <button onclick="switchMarket(2)" class="market-tab py-3 px-4 rounded-2xl text-sm" data-market="2">Synthetic</button>
+                    <button onclick="switchMarket(3)" class="market-tab py-3 px-4 rounded-2xl text-sm" data-market="3">Aksiyalar</button>
+                </div>
+            </div>
+
+            <div class="px-4 mt-6">
+                <div class="text-xs uppercase tracking-widest text-slate-500 mb-2">Simvollar</div>
+                <div class="flex flex-wrap gap-2" id="symbols-list"></div>
+            </div>
+
+            <div class="flex-1 px-4 mt-6 overflow-auto">
+                <div class="flex justify-between mb-3">
+                    <div class="text-xs uppercase tracking-widest text-slate-500">Strategiyalar</div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="confluence-toggle" onchange="toggleConfluence()" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-700 rounded-full peer peer-checked:bg-emerald-500"></div>
+                        <span class="ml-2 text-xs" id="confluence-label">Confluence</span>
+                    </label>
+                </div>
+                <div id="strategy-list" class="space-y-2"></div>
+            </div>
+
+            <div class="p-4 text-center text-xs text-slate-500 border-t border-slate-700">
+                99% signal aniqligi • Mock Demo
+            </div>
+        </div>
+
+        <!-- MAIN CHART AREA -->
+        <div class="flex-1 flex flex-col">
+            <div class="h-14 glass border-b border-slate-700 flex items-center px-6 justify-between">
+                <div class="flex items-center gap-6">
+                    <span id="current-symbol" class="text-2xl font-mono font-bold">EURUSD</span>
+                    <span id="current-price" class="text-emerald-400 text-xl font-mono">1.08745</span>
+                    <span id="price-change" class="text-emerald-400 text-sm">+0.34%</span>
+                </div>
+
+                <div class="flex gap-6 text-sm" id="timeframes">
+                    <div onclick="changeTimeframe(0)" class="timeframe-btn cursor-pointer px-3 py-1 rounded-lg" data-tf="0">1m</div>
+                    <div onclick="changeTimeframe(1)" class="timeframe-btn cursor-pointer px-3 py-1 rounded-lg" data-tf="1">5m</div>
+                    <div onclick="changeTimeframe(2)" class="timeframe-btn active cursor-pointer px-3 py-1 rounded-lg" data-tf="2">15m</div>
+                    <div onclick="changeTimeframe(3)" class="timeframe-btn cursor-pointer px-3 py-1 rounded-lg" data-tf="3">1H</div>
+                    <div onclick="changeTimeframe(4)" class="timeframe-btn cursor-pointer px-3 py-1 rounded-lg" data-tf="4">4H</div>
+                </div>
+
+                <button onclick="toggleFullScreen()" class="px-5 py-2 bg-slate-800 rounded-2xl text-sm">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <div class="flex-1 p-4 bg-zinc-950" id="chart-wrapper">
+                <div id="chart" class="w-full h-full rounded-3xl border border-slate-700"></div>
+            </div>
+
+            <!-- Neural Vision -->
+            <div class="h-72 glass border-t border-slate-700 flex">
+                <div id="drop-zone" class="flex-1 flex flex-col items-center justify-center border-r border-slate-700 cursor-pointer hover:bg-slate-900/50"
+                     onclick="document.getElementById('image-upload').click()">
+                    <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="analyzeScreenshot(event)">
+                    <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
+                    <p class="text-slate-400">Screenshot yuklang</p>
+                </div>
+                <div class="flex-1 p-6 overflow-auto" id="analysis-result">
+                    <div id="analysis-placeholder" class="text-center py-20 text-slate-400">
+                        <i class="fas fa-brain text-6xl mb-6 opacity-40"></i>
+                        <p>AI tahlili natijasi shu yerda</p>
+                    </div>
+                    <div id="analysis-content" class="hidden"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="w-80 glass border-l border-slate-700 flex flex-col">
+            <div class="p-6">
+                <h2 class="text-lg font-semibold">Demo Hisob</h2>
+                <div class="text-4xl font-mono font-bold text-emerald-400" id="balance">12,458.75</div>
+            </div>
+
+            <div class="px-6">
+                <div class="bg-slate-900 rounded-3xl p-5">
+                    <div class="flex justify-between text-xs mb-3">
+                        <span>Risk %</span>
+                        <span id="risk-value" class="font-mono">1.5</span>
+                    </div>
+                    <input type="range" min="0.5" max="5" step="0.1" value="1.5" id="risk-slider" 
+                           class="w-full accent-cyan-400" oninput="updateRisk(this.value)">
+                </div>
+            </div>
+
+            <div class="flex-1 px-6 mt-6 overflow-auto">
+                <div class="text-xs uppercase text-slate-500 mb-3">Ochiq pozitsiyalar</div>
+                <div id="positions-list" class="space-y-3"></div>
+            </div>
+
+            <div class="h-80 border-t border-slate-700 flex flex-col">
+                <div class="px-6 py-3 bg-slate-900/70 text-xs uppercase flex justify-between">
+                    <span>Signal Log</span>
+                    <button onclick="clearLog()" class="text-cyan-400">Tozalash</button>
+                </div>
+                <div id="signal-log" class="flex-1 overflow-auto p-4 space-y-3 text-sm"></div>
+            </div>
+        </div>
     </div>
+
+    <script>
+        let chart = null, candleSeries = null;
+        let currentMarket = 0, currentSymbol = "EURUSD", currentTimeframe = 2;
+        let isConfluence = false, language = "uz", balance = 12458.75;
+        let positions = [];
+
+        const symbolsByMarket = {
+            0: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"],
+            1: ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+            2: ["Volatility 75", "Boom 500", "Crash 1000"],
+            3: ["AAPL", "TSLA", "NVDA"]
+        };
+
+        function createChart() {
+            const container = document.getElementById('chart');
+            chart = LightweightCharts.createChart(container, {
+                width: container.clientWidth,
+                height: container.clientHeight,
+                layout: { background: { color: '#0a0f1c' }, textColor: '#94a3b8' },
+                grid: { vertLines: { color: '#1e2937' }, horzLines: { color: '#1e2937' } },
+                timeScale: { timeVisible: true }
+            });
+            candleSeries = chart.addCandlestickSeries({
+                upColor: '#22c55e', downColor: '#ef4444',
+                borderUpColor: '#22c55e', borderDownColor: '#ef4444',
+                wickUpColor: '#22c55e', wickDownColor: '#ef4444'
+            });
+        }
+
+        function generateMockCandles(count = 180) {
+            let data = [], time = Math.floor(Date.now()/1000) - count*900, price = currentMarket === 0 ? 1.087 : 1250;
+            for (let i = 0; i < count; i++) {
+                let open = price;
+                let change = (Math.random() - 0.48) * (currentMarket === 1 ? 80 : 0.008);
+                let close = open + change;
+                data.push({
+                    time: time,
+                    open: +open.toFixed(5),
+                    high: +(Math.max(open, close) + Math.random()*0.01).toFixed(5),
+                    low: +(Math.min(open, close) - Math.random()*0.01).toFixed(5),
+                    close: +close.toFixed(5)
+                });
+                price = close;
+                time += 900;
+            }
+            return data;
+        }
+
+        function renderChart() {
+            if (!candleSeries) return;
+            let data = generateMockCandles();
+            candleSeries.setData(data);
+            chart.timeScale().fitContent();
+        }
+
+        function switchMarket(index) {
+            currentMarket = index;
+            document.querySelectorAll('#market-tabs button').forEach(b => b.classList.toggle('active', parseInt(b.dataset.market) === index));
+            currentSymbol = symbolsByMarket[index][0];
+            document.getElementById('current-symbol').textContent = currentSymbol;
+            renderChart();
+            addRandomSignal();
+        }
+
+        function updateSymbols() {
+            const container = document.getElementById('symbols-list');
+            container.innerHTML = '';
+            symbolsByMarket[currentMarket].forEach(sym => {
+                let btn = document.createElement('button');
+                btn.className = `px-4 py-2 text-xs rounded-2xl ${sym === currentSymbol ? 'bg-cyan-500 text-black' : 'bg-slate-800 hover:bg-slate-700'}`;
+                btn.textContent = sym;
+                btn.onclick = () => { currentSymbol = sym; document.getElementById('current-symbol').textContent = sym; renderChart(); };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderStrategies() {
+            document.getElementById('strategy-list').innerHTML = `
+                <div class="flex justify-between bg-slate-800/70 p-4 rounded-2xl cursor-pointer razgon-glow"><span>⚡ Razgon Strategy</span><span class="text-emerald-400">ON</span></div>
+                <div class="flex justify-between bg-slate-800/70 p-4 rounded-2xl cursor-pointer"><span>📍 ICT Order Blocks</span><span class="text-emerald-400">ON</span></div>
+                <div class="flex justify-between bg-slate-800/70 p-4 rounded-2xl cursor-pointer"><span>📈 EMA Cross</span><span class="text-emerald-400">ON</span></div>
+            `;
+        }
+
+        function addRandomSignal() {
+            let type = Math.random() > 0.5 ? 'buy' : 'sell';
+            let name = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB"][Math.floor(Math.random()*4)];
+            let signal = {
+                emoji: type === 'buy' ? '⬆️' : '⬇️',
+                name: name + (type === 'buy' ? ' BUY' : ' SELL'),
+                symbol: currentSymbol,
+                confluence: Math.floor(Math.random()*30) + 75
+            };
+            addToLog(signal);
+        }
+
+        function addToLog(signal) {
+            let container = document.getElementById('signal-log');
+            let div = document.createElement('div');
+            div.className = `p-3 rounded-2xl flex gap-3 ${signal.emoji === '⬆️' ? 'bg-emerald-900/30' : 'bg-red-900/30'}`;
+            div.innerHTML = `<div class="text-3xl">${signal.emoji}</div><div><div class="font-semibold">${signal.name}</div><div class="text-xs text-cyan-400">${signal.confluence}% confluence</div></div>`;
+            container.prepend(div);
+            if (container.children.length > 6) container.removeChild(container.lastChild);
+        }
+
+        function updateRisk(val) {
+            document.getElementById('risk-value').textContent = val;
+        }
+
+        function scanMarket() {
+            let btn = document.querySelector('button[onclick="scanMarket()"]');
+            btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
+            setTimeout(() => {
+                renderChart();
+                addRandomSignal();
+                addRandomSignal();
+                btn.innerHTML = `<i class="fas fa-bolt"></i> Bozor skanerlash`;
+            }, 800);
+        }
+
+        function analyzeScreenshot(e) {
+            document.getElementById('analysis-placeholder').classList.add('hidden');
+            document.getElementById('analysis-content').classList.remove('hidden');
+            document.getElementById('analysis-content').innerHTML = `<div class="p-6 glass rounded-3xl text-center"><p class="text-emerald-400 text-xl">High Confluence Signal Detected (96%)</p><button onclick="alert('Trade ochildi!')" class="mt-6 w-full py-4 bg-cyan-500 rounded-3xl">Trade ochish</button></div>`;
+        }
+
+        function clearLog() { document.getElementById('signal-log').innerHTML = ''; }
+
+        function changeTimeframe(tf) {
+            currentTimeframe = tf;
+            document.querySelectorAll('.timeframe-btn').forEach((el,i) => el.classList.toggle('active', i === tf));
+            renderChart();
+        }
+
+        function toggleLanguage() {
+            language = language === 'uz' ? 'en' : 'uz';
+            document.getElementById('current-lang').textContent = language.toUpperCase();
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+            else document.exitFullscreen();
+        }
+
+        function initializeApp() {
+            createChart();
+            renderChart();
+            updateSymbols();
+            renderStrategies();
+
+            document.getElementById('current-price').textContent = "1.08745";
+            updateRisk(1.5);
+
+            setTimeout(addRandomSignal, 600);
+            setTimeout(addRandomSignal, 1400);
+
+            console.log('%c✅ Trading Sniper Signal Antigravity Edition – To‘liq yuklandi!', 'color:#00f5ff');
+        }
+
+        window.onload = initializeApp;
+    </script>
 </body>
 </html>
