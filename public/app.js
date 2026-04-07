@@ -1,4 +1,4 @@
-// app.js - 3-Bosqich: Katta Neon Signallar + Razgon Effekti
+// app.js - 4-Bosqich: Confluence Mode + Yaxshilangan Signal Tizimi
 let chart = null;
 let candleSeries = null;
 let currentMarket = 2;
@@ -8,12 +8,22 @@ let isConfluence = false;
 let language = "uz";
 let balance = 12458.75;
 let positions = [];
+let totalSignals = 0;
 
 const symbolsByMarket = {
     0: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"],
     1: ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
     2: ["Volatility 75", "Boom 500", "Crash 1000", "Step Index"],
     3: ["AAPL", "TSLA", "NVDA"]
+};
+
+// Strategiyalar va ularning kuchli bozorlari
+const strategyRules = {
+    "RAZGON": { markets: [2], color: "#ff00ff", emoji: "⚡" },
+    "ICT": { markets: [0,1], color: "#fcd34d", emoji: "📍" },
+    "EMA": { markets: [0,1,3], color: "#60a5fa", emoji: "📈" },
+    "SMC": { markets: [0,1], color: "#c084fc", emoji: "🔺" },
+    "BOLLINGER": { markets: [2], color: "#f472b6", emoji: "📉" }
 };
 
 function createChart() {
@@ -66,18 +76,21 @@ function renderChart() {
     const data = generateMockCandles();
     candleSeries.setData(data);
     chart.timeScale().fitContent();
-    addNeonSignalsToChart(data);
+    addConfluenceSignalsToChart(data);
 }
 
-// Katta neon signallar (eng muhim qism)
-function addNeonSignalsToChart(data) {
+function addConfluenceSignalsToChart(data) {
     const markers = [];
-    const points = [32, 71, 108, 145, 167];
+    const points = [35, 68, 105, 142, 167];
 
     points.forEach((idx, i) => {
         if (idx >= data.length) return;
         const isBuy = i % 2 === 0;
         const isRazgon = i === 0 || i === 3;
+        const confluenceScore = isRazgon ? 95 : 78 + Math.floor(Math.random() * 15);
+
+        // Confluence mode faol bo‘lsa faqat yuqori balli signallarni ko‘rsatish
+        if (isConfluence && confluenceScore < 88) return;
 
         markers.push({
             time: data[idx].time,
@@ -108,7 +121,7 @@ function updateSymbols() {
     container.innerHTML = '';
     symbolsByMarket[currentMarket].forEach(sym => {
         const btn = document.createElement('button');
-        btn.className = `px-5 py-2.5 text-sm font-mono rounded-2xl transition-all ${sym === currentSymbol ? 'bg-cyan-500 text-black' : 'bg-slate-800 hover:bg-slate-700'}`;
+        btn.className = `px-5 py-2.5 text-sm font-mono rounded-2xl transition-all ${sym === currentSymbol ? 'bg-cyan-500 text-black font-semibold' : 'bg-slate-800 hover:bg-slate-700'}`;
         btn.textContent = sym;
         btn.onclick = () => {
             currentSymbol = sym;
@@ -145,21 +158,26 @@ function toggleConfluence() {
     isConfluence = !isConfluence;
     document.getElementById('confluence-label').innerHTML = isConfluence ? 
         '<span class="text-emerald-400 font-semibold">Confluence ON</span>' : 'Confluence';
+    renderChart();
 }
 
 function addRandomSignal() {
     const type = Math.random() > 0.5 ? 'buy' : 'sell';
-    const strategies = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB"];
+    const strategies = ["RAZGON", "ICT FVG", "EMA 9/21", "SMC OB", "Bollinger Squeeze"];
     const name = strategies[Math.floor(Math.random() * strategies.length)];
 
     const signal = {
         emoji: type === 'buy' ? '⬆️' : '⬇️',
         name: `${name} ${type.toUpperCase()}`,
         symbol: currentSymbol,
-        confluence: Math.floor(Math.random() * 20) + 83
+        confluence: isConfluence ? Math.floor(Math.random() * 12) + 89 : Math.floor(Math.random() * 25) + 75
     };
+
+    // Confluence rejimida past balli signallarni filtrlash
+    if (isConfluence && signal.confluence < 88) return;
+
     addToLog(signal);
-    if (Math.random() > 0.6) takePosition(signal);
+    if (Math.random() > 0.5) takePosition(signal);
 }
 
 function addToLog(signal) {
@@ -171,7 +189,7 @@ function addToLog(signal) {
         <div class="flex-1">
             <div class="font-semibold">${signal.name}</div>
             <div class="text-xs text-slate-400">${signal.symbol} • 15m</div>
-            <div class="text-cyan-400">${signal.confluence}% confluence</div>
+            <div class="text-cyan-400 font-medium">${signal.confluence}% confluence</div>
         </div>
     `;
     container.prepend(div);
@@ -184,7 +202,7 @@ function takePosition(signal) {
         symbol: signal.symbol,
         type: signal.emoji === '⬆️' ? 'BUY' : 'SELL',
         lot: lot,
-        pl: (Math.random() * 250 + 50).toFixed(2)
+        pl: (Math.random() * 280 + 60).toFixed(2)
     });
     renderPositions();
 }
@@ -223,6 +241,7 @@ function scanMarket() {
         renderChart();
         addRandomSignal();
         addRandomSignal();
+        addRandomSignal();
         btn.innerHTML = original;
     }, 1000);
 }
@@ -235,6 +254,7 @@ function analyzeScreenshot(e) {
         <div class="p-6 glass rounded-3xl text-center">
             <div class="text-emerald-400 text-2xl font-bold">High Confluence Signal</div>
             <div class="text-6xl font-mono text-cyan-400 my-6">97%</div>
+            <div class="text-slate-300 mb-4">RAZGON + ICT + EMA</div>
             <button onclick="fakeTradeFromAnalysis()" class="mt-6 w-full py-4 bg-gradient-to-r from-cyan-500 to-magenta-500 rounded-3xl font-bold">
                 Trade ochish
             </button>
@@ -243,7 +263,7 @@ function analyzeScreenshot(e) {
 }
 
 function fakeTradeFromAnalysis() {
-    alert("✅ Demo trade ochildi!");
+    alert("✅ Demo rejimda trade ochildi!");
     addRandomSignal();
 }
 
@@ -278,16 +298,17 @@ function initializeApp() {
 
     setTimeout(addRandomSignal, 600);
     setTimeout(addRandomSignal, 1400);
+    setTimeout(addRandomSignal, 2200);
 
-    // Live narx
+    // Live narx animatsiyasi
     setInterval(() => {
         const priceEl = document.getElementById('current-price');
         let price = parseFloat(priceEl.textContent);
-        price += (Math.random() - 0.45) * (currentMarket === 2 ? 8 : 0.002);
+        price += (Math.random() - 0.45) * (currentMarket === 2 ? 8.5 : 0.0022);
         priceEl.textContent = price.toFixed(currentMarket === 2 ? 3 : 5);
-    }, 1800);
+    }, 1700);
 
-    console.log('%c3-Bosqich tugadi - Katta neon signallar qo‘shildi!', 'color:#00f5ff; font-size:15px');
+    console.log('%c4-Bosqich tugadi - Confluence Mode va yaxshilangan signallar qo‘shildi!', 'color:#00f5ff; font-size:15px');
 }
 
 window.onload = initializeApp;
