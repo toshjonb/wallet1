@@ -35,41 +35,20 @@
 
         .neon-cyan { text-shadow: 0 0 25px #00f5ff, 0 0 50px #00f5ff; }
 
-        /* SIGNAL PANEL */
-        #signal-panel {
-            height: 280px;
+        /* RESIZABLE + DRAGGABLE PANEL */
+        .resizable-panel {
             position: relative;
-            transition: height 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
             z-index: 40;
         }
-        #signal-panel.fullscreen {
+        .resizable-panel.fullscreen {
             height: 100vh !important;
             position: fixed;
             top: 0;
-            left: 0;
-            right: 0;
             z-index: 100;
         }
 
-        /* DEMO ACCOUNT PANEL (o‘ng taraf) */
-        #demo-panel {
-            height: 100%;
-            position: relative;
-            transition: height 0.45s cubic-bezier(0.32, 0.72, 0, 1);
-            user-select: none;
-            z-index: 40;
-        }
-        #demo-panel.fullscreen {
-            height: 100vh !important;
-            position: fixed;
-            top: 0;
-            right: 0;
-            width: 380px;
-            z-index: 100;
-        }
-
-        /* Umumiy drag va resize handle */
         .drag-handle {
             position: absolute;
             top: 8px;
@@ -86,6 +65,7 @@
             background: #ff00ff;
             cursor: grabbing;
         }
+
         .resize-handle {
             position: absolute;
             top: -8px;
@@ -190,7 +170,7 @@
         </div>
 
         <!-- SIGNAL PANEL -->
-        <div id="signal-panel" class="glass border-t border-slate-700 p-6 relative">
+        <div id="signal-panel" class="glass border-t border-slate-700 p-6 relative resizable-panel">
             <div id="signal-drag-handle" class="drag-handle"></div>
             <div id="signal-resize-handle" class="resize-handle"></div>
             <div class="flex justify-between mb-4 items-center pt-6">
@@ -203,8 +183,8 @@
         </div>
     </div>
 
-    <!-- RIGHT PANEL - DEMO ACCOUNT (Yangi resizable + draggable) -->
-    <div id="demo-panel" class="w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col relative">
+    <!-- DEMO ACCOUNT PANEL (o‘ng taraf) - RESIZABLE + DRAGGABLE -->
+    <div id="demo-panel" class="w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col relative resizable-panel">
         <div id="demo-drag-handle" class="drag-handle"></div>
         <div id="demo-resize-handle" class="resize-handle"></div>
 
@@ -256,7 +236,7 @@ let balance = 12458.75;
 let equity = 12521.40;
 let positions = [];
 
-// Umumiy resizable funksiyasi
+// Umumiy resizable funksiya
 function makeResizable(panelId) {
     const panel = document.getElementById(panelId);
     const dragHandle = panel.querySelector('.drag-handle');
@@ -280,14 +260,15 @@ function makeResizable(panelId) {
 
     document.addEventListener('mousemove', (e) => {
         if (!isDragging && !isResizing) return;
+
         const diff = startY - e.clientY;
         let newHeight = startHeight + diff;
 
-        if (newHeight > window.innerHeight * 0.8) {
+        if (newHeight > window.innerHeight * 0.82) {
             panel.classList.add('fullscreen');
         } else {
             panel.classList.remove('fullscreen');
-            newHeight = Math.max(200, Math.min(newHeight, window.innerHeight - 100));
+            newHeight = Math.max(180, Math.min(newHeight, window.innerHeight - 100));
             panel.style.height = newHeight + 'px';
         }
     });
@@ -300,7 +281,7 @@ function makeResizable(panelId) {
 }
 
 function initializeApp() {
-    // Chart yaratish
+    // Chart
     const container = document.getElementById('chart');
     chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
@@ -325,7 +306,7 @@ function initializeApp() {
     document.getElementById('current-symbol').textContent = currentSymbol;
     updateLivePrice();
 
-    // Har ikkala panelni resizable qilish
+    // Ikkala panelni ham resizable qilish
     makeResizable('signal-panel');
     makeResizable('demo-panel');
 
@@ -337,7 +318,7 @@ function initializeApp() {
     console.log('%c✅ Endi ham SIGNAL PANEL ham DEMO ACCOUNT bo‘limi resizable + draggable! Yuqoriga tortib to‘liq ochiladi.', 'color:#ff00ff; font-size:18px; font-weight:bold');
 }
 
-// Qolgan funksiyalar (oldingi versiyadan)
+// Qolgan funksiyalar (oldingi versiyadan bir xil)
 function renderChart() {
     if (!candleSeries) return;
     const data = generateMockCandles();
@@ -529,15 +510,6 @@ function toggleLanguage() {
 function toggleFullScreen() {
     if (!document.fullscreenElement) document.documentElement.requestFullscreen();
     else document.exitFullscreen();
-}
-
-function updateEquity() {
-    const openPL = positions.reduce((sum, p) => sum + p.pl, 0);
-    equity = balance + openPL;
-    document.getElementById('equity').innerHTML = `$${equity.toFixed(2)} <span class="text-xs text-emerald-400">(+0.50%)</span>`;
-    const totalEl = document.getElementById('total-pl');
-    totalEl.textContent = (openPL >= 0 ? '+' : '') + '$' + openPL.toFixed(2);
-    totalEl.className = openPL >= 0 ? "text-3xl font-bold text-emerald-400" : "text-3xl font-bold text-red-400";
 }
 
 const symbolsByMarket = {
