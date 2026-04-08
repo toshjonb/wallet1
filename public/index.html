@@ -35,27 +35,46 @@
 
         .neon-cyan { text-shadow: 0 0 25px #00f5ff, 0 0 50px #00f5ff; }
 
-        /* RESIZABLE + DRAGGABLE PANEL */
+        /* RESIZABLE + DRAGGABLE PANELS */
         .resizable-panel {
             position: relative;
-            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
             z-index: 40;
         }
-        .resizable-panel.fullscreen {
-            height: 100vh !important;
+
+        /* Chap panel - faqat o‘ng tomonga kengayadi */
+        #sidebar-panel {
+            width: 280px;
+        }
+        #sidebar-panel.expanded {
+            width: 460px !important;
+        }
+
+        /* O‘ng panel - faqat chap tomonga kengayadi */
+        #demo-panel {
+            width: 380px;
+        }
+        #demo-panel.expanded {
+            width: 540px !important;
+        }
+
+        /* Pastki panel - faqat tepaga kengayadi */
+        #signal-panel {
+            height: 280px;
+        }
+        #signal-panel.expanded {
+            height: 92vh !important;
             position: fixed;
-            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
         }
 
+        /* Drag va Resize handlelar */
         .drag-handle {
             position: absolute;
-            top: 8px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 70px;
-            height: 6px;
             background: #64748b;
             border-radius: 9999px;
             cursor: grab;
@@ -66,14 +85,44 @@
             cursor: grabbing;
         }
 
+        /* Chap va O‘ng panel uchun vertikal drag */
+        #sidebar-drag-handle, #demo-drag-handle {
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 100px;
+        }
+        #sidebar-drag-handle { left: -3px; }
+        #demo-drag-handle { right: -3px; }
+
+        /* Pastki panel uchun gorizontal drag */
+        #signal-drag-handle {
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 6px;
+        }
+
         .resize-handle {
             position: absolute;
-            top: -8px;
+            z-index: 30;
+        }
+        #sidebar-resize-handle, #demo-resize-handle {
+            top: 0;
+            bottom: 0;
+            width: 12px;
+            cursor: ew-resize;
+        }
+        #sidebar-resize-handle { left: -6px; }
+        #demo-resize-handle { right: -6px; }
+
+        #signal-resize-handle {
+            top: -6px;
             left: 0;
             right: 0;
-            height: 16px;
+            height: 12px;
             cursor: ns-resize;
-            z-index: 30;
         }
     </style>
 </head>
@@ -97,8 +146,11 @@
 
 <div class="flex h-[calc(100vh-28px)] flex-col lg:flex-row">
 
-    <!-- SIDEBAR -->
-    <div class="w-full lg:w-72 bg-zinc-950 border-r border-slate-700 flex flex-col overflow-auto">
+    <!-- CHAP PANEL (Sidebar) - Faqat o‘ng tomonga kengayadi -->
+    <div id="sidebar-panel" class="resizable-panel w-72 bg-zinc-950 border-r border-slate-700 flex flex-col overflow-auto">
+        <div id="sidebar-drag-handle" class="drag-handle"></div>
+        <div id="sidebar-resize-handle" class="resize-handle"></div>
+
         <div class="p-6 border-b border-slate-700">
             <h1 class="title-font text-4xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
             <p class="text-emerald-400 text-xs tracking-[4px] mt-1">ANTIGRAVITY EDITION • REAL-TIME</p>
@@ -169,7 +221,7 @@
             <div id="chart" class="w-full h-full"></div>
         </div>
 
-        <!-- SIGNAL PANEL -->
+        <!-- PASTKI SIGNAL PANEL - Tepaga kengayadi -->
         <div id="signal-panel" class="glass border-t border-slate-700 p-6 relative resizable-panel">
             <div id="signal-drag-handle" class="drag-handle"></div>
             <div id="signal-resize-handle" class="resize-handle"></div>
@@ -183,8 +235,8 @@
         </div>
     </div>
 
-    <!-- DEMO ACCOUNT PANEL (o‘ng taraf) - RESIZABLE + DRAGGABLE -->
-    <div id="demo-panel" class="w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col relative resizable-panel">
+    <!-- O‘NG PANEL (DEMO ACCOUNT) - Chap tomonga kengayadi -->
+    <div id="demo-panel" class="resizable-panel w-96 bg-zinc-950 border-l border-slate-700 flex flex-col">
         <div id="demo-drag-handle" class="drag-handle"></div>
         <div id="demo-resize-handle" class="resize-handle"></div>
 
@@ -222,7 +274,7 @@
 </div>
 
 <script>
-// ==================== RESIZABLE + DRAGGABLE (Signal + Demo Panel) ====================
+// ==================== 3 TA PANEL UCHUN TO‘G‘RI RESIZABLE + DRAGGABLE ====================
 
 let chart = null;
 let candleSeries = null;
@@ -237,39 +289,44 @@ let equity = 12521.40;
 let positions = [];
 
 // Umumiy resizable funksiya
-function makeResizable(panelId) {
+function makeResizable(panelId, direction = 'vertical') {
     const panel = document.getElementById(panelId);
     const dragHandle = panel.querySelector('.drag-handle');
     const resizeHandle = panel.querySelector('.resize-handle');
 
-    let isDragging = false, isResizing = false, startY = 0, startHeight = 0;
+    let isDragging = false, isResizing = false, startPos = 0, startSize = 0;
 
     dragHandle.addEventListener('mousedown', (e) => {
         isDragging = true;
-        startY = e.clientY;
-        startHeight = panel.offsetHeight;
-        document.body.style.cursor = 'grabbing';
+        startPos = direction === 'vertical' ? e.clientY : e.clientX;
+        startSize = direction === 'vertical' ? panel.offsetHeight : panel.offsetWidth;
+        document.body.style.cursor = direction === 'vertical' ? 'ns-resize' : 'ew-resize';
     });
 
     resizeHandle.addEventListener('mousedown', (e) => {
         isResizing = true;
-        startY = e.clientY;
-        startHeight = panel.offsetHeight;
-        document.body.style.cursor = 'ns-resize';
+        startPos = direction === 'vertical' ? e.clientY : e.clientX;
+        startSize = direction === 'vertical' ? panel.offsetHeight : panel.offsetWidth;
+        document.body.style.cursor = direction === 'vertical' ? 'ns-resize' : 'ew-resize';
     });
 
     document.addEventListener('mousemove', (e) => {
         if (!isDragging && !isResizing) return;
 
-        const diff = startY - e.clientY;
-        let newHeight = startHeight + diff;
+        const currentPos = direction === 'vertical' ? e.clientY : e.clientX;
+        const diff = startPos - currentPos;
+        let newSize = startSize + diff;
 
-        if (newHeight > window.innerHeight * 0.82) {
-            panel.classList.add('fullscreen');
+        if (newSize > (direction === 'vertical' ? window.innerHeight * 0.82 : 600)) {
+            panel.classList.add('expanded');
         } else {
-            panel.classList.remove('fullscreen');
-            newHeight = Math.max(180, Math.min(newHeight, window.innerHeight - 100));
-            panel.style.height = newHeight + 'px';
+            panel.classList.remove('expanded');
+            newSize = Math.max(180, Math.min(newSize, direction === 'vertical' ? window.innerHeight - 100 : 600));
+            if (direction === 'vertical') {
+                panel.style.height = newSize + 'px';
+            } else {
+                panel.style.width = newSize + 'px';
+            }
         }
     });
 
@@ -306,19 +363,20 @@ function initializeApp() {
     document.getElementById('current-symbol').textContent = currentSymbol;
     updateLivePrice();
 
-    // Ikkala panelni ham resizable qilish
-    makeResizable('signal-panel');
-    makeResizable('demo-panel');
+    // 3 ta panelni ham resizable qilish
+    makeResizable('signal-panel', 'vertical');   // Pastki - tepaga
+    makeResizable('demo-panel', 'horizontal');   // O‘ng - chapga
+    makeResizable('sidebar-panel', 'horizontal'); // Chap - o‘ngga
 
     setTimeout(addRandomSignal, 400);
     setTimeout(addRandomSignal, 1100);
     setTimeout(addRandomSignal, 1800);
     setInterval(addRandomSignal, 4500);
 
-    console.log('%c✅ Endi ham SIGNAL PANEL ham DEMO ACCOUNT bo‘limi resizable + draggable! Yuqoriga tortib to‘liq ochiladi.', 'color:#ff00ff; font-size:18px; font-weight:bold');
+    console.log('%c✅ Endi 3 ta panel ham to‘g‘ri yo‘nalishda resizable + draggable ishlaydi!', 'color:#ff00ff; font-size:18px; font-weight:bold');
 }
 
-// Qolgan funksiyalar (oldingi versiyadan bir xil)
+// Qolgan funksiyalar (oldingi versiyadan)
 function renderChart() {
     if (!candleSeries) return;
     const data = generateMockCandles();
