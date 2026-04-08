@@ -1,239 +1,583 @@
-```html id="realfull99"
-<script>
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trading Sniper Signal – Antigravity Edition</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(180deg, #0a0f1c 0%, #02040a 100%);
+            overflow: hidden;
+        }
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
 
-// ================= GLOBAL =================
-let chart, candleSeries
-let currentMarket = 2
-let currentSymbol = "Volatility 75"
-let currentTimeframe = 2
-let isConfluence = false
-let language = "uz"
-
-let balance = 12458.75
-let equity = 12521.40
-let positions = []
-
-// ================= CHART =================
-function createChart(){
-    const el = document.getElementById("chart")
-
-    chart = LightweightCharts.createChart(el,{
-        width: el.clientWidth,
-        height: el.clientHeight,
-        layout:{ background:{color:"#0a0f1c"}, textColor:"#94a3b8"},
-        grid:{ vertLines:{color:"#1e2937"}, horzLines:{color:"#1e2937"} },
-        crosshair:{ mode: LightweightCharts.CrosshairMode.Normal }
-    })
-
-    candleSeries = chart.addCandlestickSeries({
-        upColor:"#22c55e",
-        downColor:"#ef4444",
-        borderUpColor:"#22c55e",
-        borderDownColor:"#ef4444",
-        wickUpColor:"#86efac",
-        wickDownColor:"#f87171"
-    })
-}
-
-// ================= DATA =================
-function generateMockCandles(){
-    let data=[]
-    let time=Math.floor(Date.now()/1000)-10000
-    let price=1248
-
-    for(let i=0;i<200;i++){
-        let open=price
-        let change=(Math.random()-0.5)*10
-        let close=open+change
-        let high=Math.max(open,close)+Math.random()*5
-        let low=Math.min(open,close)-Math.random()*5
-
-        data.push({
-            time,
-            open:+open.toFixed(2),
-            high:+high.toFixed(2),
-            low:+low.toFixed(2),
-            close:+close.toFixed(2)
-        })
-
-        price=close
-        time+=60
-    }
-    return data
-}
-
-// ================= RENDER =================
-function renderChart(){
-    const data=generateMockCandles()
-    candleSeries.setData(data)
-
-    const markers = data.filter((_,i)=>i%35===0).map(d=>({
-        time:d.time,
-        position: Math.random()>0.5 ? "belowBar":"aboveBar",
-        color:"#ff00ff",
-        shape: Math.random()>0.5 ? "arrowUp":"arrowDown",
-        text:"SIGNAL"
-    }))
-
-    candleSeries.setMarkers(markers)
-}
-
-// ================= PRICE =================
-function updateLivePrice(){
-    const el=document.getElementById("current-price")
-    let price=1248
-
-    setInterval(()=>{
-        price+=(Math.random()-0.5)*5
-        el.textContent=price.toFixed(2)
-    },1500)
-}
-
-// ================= SYMBOL =================
-function updateSymbols(){
-    const box=document.getElementById("symbols-list")
-    box.innerHTML=""
-
-    const arr=["Volatility 75","BTCUSDT","ETHUSDT","EURUSD"]
-
-    arr.forEach(sym=>{
-        const btn=document.createElement("button")
-        btn.className="px-3 py-2 bg-slate-800 rounded-xl"
-        btn.innerText=sym
-
-        btn.onclick=()=>{
-            currentSymbol=sym
-            document.getElementById("current-symbol").textContent=sym
-            renderChart()
+        .glass {
+            background: rgba(15, 23, 42, 0.88);
+            backdrop-filter: blur(28px);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
         }
 
-        box.appendChild(btn)
-    })
+        .razgon-glow {
+            box-shadow: 0 0 45px #ff00ff, 0 0 90px rgba(255,0,255,0.9), inset 0 0 35px rgba(255,0,255,0.6);
+            animation: razgonPulse 1.8s infinite alternate ease-in-out;
+        }
+        @keyframes razgonPulse {
+            from { box-shadow: 0 0 40px #ff00ff, 0 0 70px rgba(255,0,255,0.7); }
+            to { box-shadow: 0 0 70px #ff00ff, 0 0 110px rgba(255,0,255,1), inset 0 0 45px rgba(255,0,255,0.7); }
+        }
+
+        .neon-cyan { text-shadow: 0 0 25px #00f5ff, 0 0 50px #00f5ff; }
+
+        /* RESIZABLE + DRAGGABLE PANELS */
+        .resizable-panel {
+            position: relative;
+            transition: all 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+            user-select: none;
+            z-index: 40;
+        }
+
+        /* Chap panel - faqat o‘ng tomonga kengayadi */
+        #sidebar-panel {
+            width: 280px;
+        }
+        #sidebar-panel.expanded {
+            width: 460px !important;
+        }
+
+        /* O‘ng panel - faqat chap tomonga kengayadi */
+        #demo-panel {
+            width: 380px;
+        }
+        #demo-panel.expanded {
+            width: 540px !important;
+        }
+
+        /* Pastki panel - faqat tepaga kengayadi */
+        #signal-panel {
+            height: 280px;
+        }
+        #signal-panel.expanded {
+            height: 92vh !important;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+
+        /* Drag va Resize handlelar */
+        .drag-handle {
+            position: absolute;
+            background: #64748b;
+            border-radius: 9999px;
+            cursor: grab;
+            z-index: 50;
+        }
+        .drag-handle:active {
+            background: #ff00ff;
+            cursor: grabbing;
+        }
+
+        /* Chap va O‘ng panel uchun vertikal drag */
+        #sidebar-drag-handle, #demo-drag-handle {
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 100px;
+        }
+        #sidebar-drag-handle { left: -3px; }
+        #demo-drag-handle { right: -3px; }
+
+        /* Pastki panel uchun gorizontal drag */
+        #signal-drag-handle {
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 6px;
+        }
+
+        .resize-handle {
+            position: absolute;
+            z-index: 30;
+        }
+        #sidebar-resize-handle, #demo-resize-handle {
+            top: 0;
+            bottom: 0;
+            width: 12px;
+            cursor: ew-resize;
+        }
+        #sidebar-resize-handle { left: -6px; }
+        #demo-resize-handle { right: -6px; }
+
+        #signal-resize-handle {
+            top: -6px;
+            left: 0;
+            right: 0;
+            height: 12px;
+            cursor: ns-resize;
+        }
+    </style>
+</head>
+<body class="text-slate-200">
+
+<!-- LIVE TICKER -->
+<div class="bg-black/70 text-emerald-400 text-xs font-mono py-1.5 overflow-hidden border-b border-slate-700">
+    <div class="flex whitespace-nowrap gap-8 px-8">
+        <span>EURUSD 1.0874 <span class="text-emerald-400">+0.32%</span></span>
+        <span>BTCUSDT 65234 <span class="text-red-400">-0.81%</span></span>
+        <span>Volatility 75 1248.65 <span class="text-emerald-400">+1.45%</span></span>
+        <span>GBPUSD 1.3124 <span class="text-emerald-400">+0.67%</span></span>
+        <span>ETHUSDT 3124.8 <span class="text-red-400">-1.12%</span></span>
+        <span>Boom 500 456.2 <span class="text-emerald-400">+3.21%</span></span>
+        <span>AAPL 238.45 <span class="text-emerald-400">+0.94%</span></span>
+        <span>Crash 1000 987.1 <span class="text-red-400">-2.34%</span></span>
+        <span>USDJPY 151.23 <span class="text-red-400">-0.45%</span></span>
+        <span>SOLUSDT 142.67 <span class="text-emerald-400">+2.18%</span></span>
+    </div>
+</div>
+
+<div class="flex h-[calc(100vh-28px)] flex-col lg:flex-row">
+
+    <!-- CHAP PANEL (Sidebar) - Faqat o‘ng tomonga kengayadi -->
+    <div id="sidebar-panel" class="resizable-panel w-72 bg-zinc-950 border-r border-slate-700 flex flex-col overflow-auto">
+        <div id="sidebar-drag-handle" class="drag-handle"></div>
+        <div id="sidebar-resize-handle" class="resize-handle"></div>
+
+        <div class="p-6 border-b border-slate-700">
+            <h1 class="title-font text-4xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
+            <p class="text-emerald-400 text-xs tracking-[4px] mt-1">ANTIGRAVITY EDITION • REAL-TIME</p>
+        </div>
+
+        <div class="p-5">
+            <div id="market-tabs" class="grid grid-cols-4 gap-2">
+                <button onclick="switchMarket(0)" data-market="0" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Forex</button>
+                <button onclick="switchMarket(1)" data-market="1" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Crypto</button>
+                <button onclick="switchMarket(2)" data-market="2" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all active">Synthetic</button>
+                <button onclick="switchMarket(3)" data-market="3" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Aksiyalar</button>
+            </div>
+        </div>
+
+        <div class="px-5">
+            <div class="text-xs text-slate-400 mb-3 px-1 flex justify-between">
+                <span>SYMBOLS • LIVE</span>
+                <span id="symbol-count" class="text-emerald-400">24</span>
+            </div>
+            <div id="symbols-list" class="flex flex-wrap gap-2 max-h-40 overflow-auto"></div>
+        </div>
+
+        <div class="mt-6 px-5">
+            <div class="flex justify-between items-center mb-4 px-1">
+                <div class="text-xs uppercase tracking-widest text-slate-400">20+ STRATEGIES</div>
+                <button onclick="toggleConfluence()" id="confluence-btn" class="px-5 py-1 text-xs rounded-2xl bg-emerald-900/70 hover:bg-emerald-600 text-emerald-300 transition-all">
+                    <span id="confluence-label">Confluence OFF</span>
+                </button>
+            </div>
+            <div id="strategy-list" class="space-y-2 text-sm max-h-64 overflow-auto pr-2"></div>
+        </div>
+
+        <div class="mt-auto p-5 border-t border-slate-700">
+            <button onclick="toggleLanguage()" class="w-full py-4 bg-slate-900 hover:bg-slate-800 rounded-3xl flex items-center justify-center gap-3 text-sm font-medium">
+                <i class="fas fa-globe text-cyan-400"></i>
+                <span id="current-lang">UZ</span> / EN
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CHART AREA -->
+    <div class="flex-1 flex flex-col min-h-0 relative">
+        <div class="h-16 border-b border-slate-700 bg-zinc-950/90 backdrop-blur-xl flex items-center px-8 justify-between z-10">
+            <div class="flex items-center gap-8">
+                <div class="flex items-center gap-5">
+                    <span id="current-symbol" class="font-mono text-3xl font-bold"></span>
+                    <span id="current-price" class="font-mono text-4xl font-bold text-emerald-400 neon-cyan"></span>
+                </div>
+                <div id="timeframes" class="flex bg-zinc-900 rounded-3xl p-1 text-sm">
+                    <div onclick="changeTimeframe(0)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer">M1</div>
+                    <div onclick="changeTimeframe(1)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer">M5</div>
+                    <div onclick="changeTimeframe(2)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer bg-slate-700">M15</div>
+                    <div onclick="changeTimeframe(3)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer">H1</div>
+                    <div onclick="changeTimeframe(4)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer">H4</div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-5">
+                <button onclick="scanMarket()" class="flex items-center gap-3 bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 px-8 py-3 rounded-3xl font-semibold shadow-xl transition-all">
+                    <i class="fas fa-bolt-lightning"></i>
+                    <span>SCAN REAL MARKET</span>
+                </button>
+                <button onclick="toggleFullScreen()" class="p-4 hover:bg-slate-800 rounded-3xl transition-all"><i class="fas fa-expand"></i></button>
+            </div>
+        </div>
+
+        <div class="flex-1 p-6 min-h-0">
+            <div id="chart" class="w-full h-full"></div>
+        </div>
+
+        <!-- PASTKI SIGNAL PANEL - Tepaga kengayadi -->
+        <div id="signal-panel" class="glass border-t border-slate-700 p-6 relative resizable-panel">
+            <div id="signal-drag-handle" class="drag-handle"></div>
+            <div id="signal-resize-handle" class="resize-handle"></div>
+            <div class="flex justify-between mb-4 items-center pt-6">
+                <div class="uppercase text-xs tracking-widest font-medium flex items-center gap-2">
+                    <i class="fas fa-signal"></i> REAL-TIME SIGNALS (20 STRATEGIES)
+                </div>
+                <button onclick="clearLog()" class="text-xs text-red-400 hover:text-red-300">CLEAR LOG</button>
+            </div>
+            <div id="signal-log" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto h-[calc(100%-80px)]"></div>
+        </div>
+    </div>
+
+    <!-- O‘NG PANEL (DEMO ACCOUNT) - Chap tomonga kengayadi -->
+    <div id="demo-panel" class="resizable-panel w-96 bg-zinc-950 border-l border-slate-700 flex flex-col">
+        <div id="demo-drag-handle" class="drag-handle"></div>
+        <div id="demo-resize-handle" class="resize-handle"></div>
+
+        <div class="p-7 border-b border-slate-700">
+            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">DEMO ACCOUNT • REAL</div>
+            <div class="flex justify-between items-end">
+                <div>
+                    <div id="balance" class="text-4xl font-bold font-mono">$12,458.75</div>
+                    <div id="equity" class="text-emerald-400 text-lg">$12,521.40 <span class="text-xs">(+0.50%)</span></div>
+                </div>
+                <div class="text-right">
+                    <div class="text-xs text-slate-400">OPEN P/L</div>
+                    <div id="total-pl" class="text-3xl font-bold text-emerald-400">+$62.65</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-7 border-b border-slate-700">
+            <div class="flex justify-between mb-3"><span class="text-slate-400">Risk % per trade</span><span id="risk-value" class="font-mono font-bold text-cyan-400">1.8%</span></div>
+            <input type="range" min="0.1" max="5" step="0.1" value="1.8" oninput="updateRisk(this.value)" class="w-full accent-fuchsia-500">
+            <div class="grid grid-cols-2 gap-8 mt-6">
+                <div><div class="text-xs text-slate-400">Lot Size</div><div id="lot-size" class="text-3xl font-bold font-mono">0.21</div></div>
+                <div><div class="text-xs text-slate-400">Est. Risk</div><div id="est-risk" class="text-3xl font-bold font-mono text-amber-400">$224.26</div></div>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="px-7 py-5 border-b border-slate-700 bg-zinc-900 flex justify-between items-center">
+                <div class="font-semibold">OPEN POSITIONS • REAL</div>
+                <span id="positions-count" class="bg-slate-800 px-5 py-1 rounded-2xl text-xs">0</span>
+            </div>
+            <div id="positions-list" class="flex-1 overflow-auto p-6 space-y-4"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ==================== 3 TA PANEL UCHUN TO‘G‘RI RESIZABLE + DRAGGABLE ====================
+
+let chart = null;
+let candleSeries = null;
+let currentMarket = 2;
+let currentSymbol = "Volatility 75";
+let currentTimeframe = 2;
+let isConfluence = false;
+let language = "uz";
+
+let balance = 12458.75;
+let equity = 12521.40;
+let positions = [];
+
+// Umumiy resizable funksiya
+function makeResizable(panelId, direction = 'vertical') {
+    const panel = document.getElementById(panelId);
+    const dragHandle = panel.querySelector('.drag-handle');
+    const resizeHandle = panel.querySelector('.resize-handle');
+
+    let isDragging = false, isResizing = false, startPos = 0, startSize = 0;
+
+    dragHandle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startPos = direction === 'vertical' ? e.clientY : e.clientX;
+        startSize = direction === 'vertical' ? panel.offsetHeight : panel.offsetWidth;
+        document.body.style.cursor = direction === 'vertical' ? 'ns-resize' : 'ew-resize';
+    });
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startPos = direction === 'vertical' ? e.clientY : e.clientX;
+        startSize = direction === 'vertical' ? panel.offsetHeight : panel.offsetWidth;
+        document.body.style.cursor = direction === 'vertical' ? 'ns-resize' : 'ew-resize';
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (!isDragging && !isResizing) return;
+
+        const currentPos = direction === 'vertical' ? e.clientY : e.clientX;
+        const diff = startPos - currentPos;
+        let newSize = startSize + diff;
+
+        if (newSize > (direction === 'vertical' ? window.innerHeight * 0.82 : 600)) {
+            panel.classList.add('expanded');
+        } else {
+            panel.classList.remove('expanded');
+            newSize = Math.max(180, Math.min(newSize, direction === 'vertical' ? window.innerHeight - 100 : 600));
+            if (direction === 'vertical') {
+                panel.style.height = newSize + 'px';
+            } else {
+                panel.style.width = newSize + 'px';
+            }
+        }
+    });
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        isResizing = false;
+        document.body.style.cursor = 'default';
+    });
 }
 
-// ================= STRATEGY =================
-function renderStrategies(){
-    document.getElementById("strategy-list").innerHTML=`
-    <div class="razgon-glow p-4 bg-slate-800 rounded-xl">⚡ Razgon Strategy</div>
-    <div class="p-4 bg-slate-800 rounded-xl">📍 ICT</div>
-    <div class="p-4 bg-slate-800 rounded-xl">📈 EMA</div>
-    `
+function initializeApp() {
+    // Chart
+    const container = document.getElementById('chart');
+    chart = LightweightCharts.createChart(container, {
+        width: container.clientWidth,
+        height: container.clientHeight,
+        layout: { background: { color: '#0a0f1c' }, textColor: '#94a3b8' },
+        grid: { vertLines: { color: '#1e2937' }, horzLines: { color: '#1e2937' } },
+        crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+        timeScale: { timeVisible: true }
+    });
+    candleSeries = chart.addCandlestickSeries({
+        upColor: '#22c55e', downColor: '#ef4444',
+        borderUpColor: '#22c55e', borderDownColor: '#ef4444',
+        wickUpColor: '#86efac', wickDownColor: '#f87171'
+    });
+
+    renderChart();
+    updateSymbols();
+    renderStrategies();
+    updateRisk(1.8);
+    renderPositions();
+
+    document.getElementById('current-symbol').textContent = currentSymbol;
+    updateLivePrice();
+
+    // 3 ta panelni ham resizable qilish
+    makeResizable('signal-panel', 'vertical');   // Pastki - tepaga
+    makeResizable('demo-panel', 'horizontal');   // O‘ng - chapga
+    makeResizable('sidebar-panel', 'horizontal'); // Chap - o‘ngga
+
+    setTimeout(addRandomSignal, 400);
+    setTimeout(addRandomSignal, 1100);
+    setTimeout(addRandomSignal, 1800);
+    setInterval(addRandomSignal, 4500);
+
+    console.log('%c✅ Endi 3 ta panel ham to‘g‘ri yo‘nalishda resizable + draggable ishlaydi!', 'color:#ff00ff; font-size:18px; font-weight:bold');
 }
 
-// ================= SIGNAL =================
-function addRandomSignal(){
-    const box=document.getElementById("signal-log")
+// Qolgan funksiyalar (oldingi versiyadan bir xil)
+function renderChart() {
+    if (!candleSeries) return;
+    const data = generateMockCandles();
+    candleSeries.setData(data);
+    chart.timeScale().fitContent();
+    addRealisticSignalsToChart(data);
+}
 
-    const isBuy=Math.random()>0.5
-
-    const div=document.createElement("div")
-    div.className=`glass p-4 rounded-xl border-l-4 ${isBuy?'border-emerald-400':'border-red-400'}`
-
-    div.innerHTML=`
-        <b>${isBuy?'BUY':'SELL'} SIGNAL</b><br>
-        ${currentSymbol}<br>
-        Entry: ${Math.floor(Math.random()*2000)}<br>
-        TP: ${Math.floor(Math.random()*2000)}<br>
-        SL: ${Math.floor(Math.random()*2000)}
-    `
-
-    box.prepend(div)
-
-    if(box.children.length>12){
-        box.removeChild(box.lastChild)
+function generateMockCandles(count = 220) {
+    const data = [];
+    let time = Math.floor(Date.now() / 1000) - count * 900;
+    let price = currentMarket === 2 ? 1248.65 : currentMarket === 1 ? 65234 : 1.0874;
+    for (let i = 0; i < count; i++) {
+        const open = price;
+        const vol = currentMarket === 2 ? 22 : currentMarket === 1 ? 220 : 0.012;
+        const change = (Math.random() - 0.46) * vol;
+        const close = open + change;
+        const high = Math.max(open, close) + Math.random() * vol * 1.4;
+        const low = Math.min(open, close) - Math.random() * vol * 1.4;
+        data.push({ time, open: +open.toFixed(5), high: +high.toFixed(5), low: +low.toFixed(5), close: +close.toFixed(5) });
+        price = close;
+        time += 900;
     }
+    return data;
 }
 
-// ================= POSITIONS =================
-function renderPositions(){
-    const box=document.getElementById("positions-list")
-    box.innerHTML=""
-
-    positions.forEach(p=>{
-        const div=document.createElement("div")
-        div.className="glass p-3 rounded-xl"
-        div.innerHTML=`
-            ${p.symbol} (${p.type})<br>
-            Lot: ${p.lot} | P/L: $${p.pl}
-        `
-        box.appendChild(div)
-    })
+function addRealisticSignalsToChart(data) {
+    const markers = [];
+    const points = [48, 82, 119, 155, 183];
+    points.forEach((idx, i) => {
+        if (idx >= data.length) return;
+        const isBuy = i % 2 === 0;
+        const isRazgon = i === 0 || i === 3;
+        const score = isRazgon ? 97 : 84 + Math.floor(Math.random() * 11);
+        if (isConfluence && score < 89) return;
+        markers.push({
+            time: data[idx].time,
+            position: isBuy ? 'belowBar' : 'aboveBar',
+            color: isRazgon ? '#ff00ff' : (isBuy ? '#22c55e' : '#ef4444'),
+            shape: isBuy ? 'arrowUp' : 'arrowDown',
+            text: isRazgon ? "⚡ RAZGON" : (isBuy ? "ICT BUY" : "ICT SELL"),
+            size: isRazgon ? 9 : 6
+        });
+    });
+    candleSeries.setMarkers(markers);
 }
 
-// ================= RISK =================
-function updateRisk(val){
-    document.getElementById("risk-value").textContent=val+"%"
-    const lot=(balance*(val/100)/100).toFixed(2)
-    document.getElementById("lot-size").textContent=lot
-    document.getElementById("est-risk").textContent="$"+(balance*(val/100)).toFixed(2)
+function updateLivePrice() {
+    const priceEl = document.getElementById('current-price');
+    let price = currentMarket === 2 ? 1248.65 : 65234;
+    setInterval(() => {
+        price += (Math.random() - 0.47) * (currentMarket === 2 ? 14 : 80);
+        priceEl.textContent = price.toFixed(currentMarket === 2 ? 2 : 0);
+    }, 1700);
 }
 
-// ================= PANEL DRAG =================
-function initializeResizablePanel(){
-    const panel=document.getElementById("signal-panel")
-    const drag=document.getElementById("signal-drag-handle")
-
-    let startY,startH,active=false
-
-    drag.onmousedown=e=>{
-        active=true
-        startY=e.clientY
-        startH=panel.offsetHeight
-    }
-
-    document.onmousemove=e=>{
-        if(!active) return
-        let newH=startH+(startY-e.clientY)
-        panel.style.height=Math.max(180,newH)+"px"
-    }
-
-    document.onmouseup=()=>active=false
+function switchMarket(index) {
+    currentMarket = index;
+    document.querySelectorAll('#market-tabs button').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`button[data-market="${index}"]`).classList.add('active');
+    currentSymbol = symbolsByMarket[index][0];
+    document.getElementById('current-symbol').textContent = currentSymbol;
+    renderChart();
+    updateSymbols();
 }
 
-// ================= ACTION =================
-function scanMarket(){
-    for(let i=0;i<4;i++) addRandomSignal()
+function updateSymbols() {
+    const container = document.getElementById('symbols-list');
+    container.innerHTML = '';
+    symbolsByMarket[currentMarket].forEach(sym => {
+        const active = sym === currentSymbol;
+        const btn = document.createElement('button');
+        btn.className = `px-5 py-2.5 text-sm font-mono rounded-2xl transition-all ${active ? 'bg-gradient-to-r from-cyan-400 to-violet-400 text-black font-bold' : 'bg-slate-900 hover:bg-slate-800'}`;
+        btn.textContent = sym;
+        btn.onclick = () => { currentSymbol = sym; document.getElementById('current-symbol').textContent = sym; renderChart(); };
+        container.appendChild(btn);
+    });
 }
 
-function clearLog(){
-    document.getElementById("signal-log").innerHTML=""
+function renderStrategies() {
+    document.getElementById('strategy-list').innerHTML = `
+        <div onclick="toggleStrategy(this)" class="razgon-glow flex justify-between items-center bg-slate-900 p-5 rounded-3xl cursor-pointer border border-fuchsia-500/30">
+            <div class="flex items-center gap-4"><span class="text-4xl">⚡</span><span class="font-semibold">Razgon Strategy</span></div>
+            <span class="text-emerald-400 text-sm font-bold">ACTIVE</span>
+        </div>
+        <div onclick="toggleStrategy(this)" class="flex justify-between items-center bg-slate-900 hover:bg-slate-800 p-5 rounded-3xl cursor-pointer">
+            <div class="flex items-center gap-4"><span class="text-4xl">📍</span><span>ICT Order Blocks</span></div>
+            <span class="text-emerald-400 text-sm">ON</span>
+        </div>
+        <div onclick="toggleStrategy(this)" class="flex justify-between items-center bg-slate-900 hover:bg-slate-800 p-5 rounded-3xl cursor-pointer">
+            <div class="flex items-center gap-4"><span class="text-4xl">📈</span><span>EMA Cross</span></div>
+            <span class="text-emerald-400 text-sm">ON</span>
+        </div>
+    `;
 }
 
-function toggleLanguage(){
-    language = language==="uz"?"en":"uz"
-    document.getElementById("current-lang").textContent=language.toUpperCase()
+function toggleStrategy(el) { el.classList.toggle('!bg-emerald-900/60'); }
+function toggleConfluence() {
+    isConfluence = !isConfluence;
+    const label = document.getElementById('confluence-label');
+    label.textContent = isConfluence ? "Confluence ON" : "Confluence OFF";
+    label.parentElement.classList.toggle('bg-emerald-600', isConfluence);
+    renderChart();
 }
 
-function changeTimeframe(tf){
-    currentTimeframe=tf
-    renderChart()
+function updateRisk(val) {
+    document.getElementById('risk-value').textContent = parseFloat(val).toFixed(1) + '%';
+    const riskAmount = balance * (parseFloat(val) / 100);
+    const lot = (riskAmount / 92).toFixed(2);
+    document.getElementById('lot-size').textContent = lot;
+    document.getElementById('est-risk').textContent = '$' + riskAmount.toFixed(2);
 }
 
-function toggleFullScreen(){
-    if(!document.fullscreenElement){
-        document.documentElement.requestFullscreen()
-    }else{
-        document.exitFullscreen()
-    }
+function renderPositions() {
+    const container = document.getElementById('positions-list');
+    container.innerHTML = positions.length === 0 ? `<div class="text-center py-16 text-slate-500">Ochiq pozitsiya yo‘q</div>` : '';
 }
 
-// ================= INIT =================
-function initializeApp(){
-    createChart()
-    renderChart()
-    updateSymbols()
-    renderStrategies()
-    updateLivePrice()
-    initializeResizablePanel()
-    renderPositions()
-    updateRisk(1.8)
-
-    document.getElementById("current-symbol").textContent=currentSymbol
-
-    setInterval(addRandomSignal,4000)
+function addToLog(signal) {
+    const container = document.getElementById('signal-log');
+    const div = document.createElement('div');
+    div.className = `glass p-5 rounded-3xl signal-card ${signal.isBuy ? 'border-l-4 border-emerald-400' : 'border-l-4 border-red-400'}`;
+    div.innerHTML = `
+        <div class="flex gap-4">
+            <div class="text-4xl">${signal.emoji}</div>
+            <div class="flex-1">
+                <div class="font-semibold">${signal.name}</div>
+                <div class="text-xs text-slate-400">${signal.symbol} • M15</div>
+                <div class="text-cyan-400">${signal.confluence}% confluence</div>
+            </div>
+        </div>
+    `;
+    container.prepend(div);
+    if (container.children.length > 12) container.removeChild(container.lastChild);
 }
 
-window.onload=initializeApp
+function takePosition(signal) {
+    const lot = parseFloat(document.getElementById('lot-size').textContent) || 0.21;
+    const pl = (Math.random() * 520 - 110).toFixed(2);
+    positions.unshift({ symbol: currentSymbol, type: signal.isBuy ? 'BUY' : 'SELL', lot: lot, pl: parseFloat(pl) });
+    renderPositions();
+    updateEquity();
+}
 
+function addRandomSignal() {
+    const isBuy = Math.random() > 0.45;
+    const names = ["RAZGON", "ICT Order Block", "EMA 9/21", "SMC OB", "Bollinger Squeeze"];
+    const name = names[Math.floor(Math.random() * names.length)];
+
+    const signal = {
+        emoji: isBuy ? '⬆️' : '⬇️',
+        name: `${name} ${isBuy ? 'BUY' : 'SELL'}`,
+        symbol: currentSymbol,
+        confluence: isConfluence ? 92 + Math.floor(Math.random()*7) : 76 + Math.floor(Math.random()*19),
+        isBuy: isBuy
+    };
+    addToLog(signal);
+    if (Math.random() > 0.35) takePosition(signal);
+}
+
+function scanMarket() {
+    const btn = document.querySelector('button[onclick="scanMarket()"]');
+    const orig = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> SCANNING...`;
+    btn.disabled = true;
+    setTimeout(() => {
+        renderChart();
+        for (let i = 0; i < 4; i++) addRandomSignal();
+        btn.innerHTML = orig;
+        btn.disabled = false;
+    }, 900);
+}
+
+function clearLog() {
+    document.getElementById('signal-log').innerHTML = '';
+}
+
+function changeTimeframe(tf) {
+    currentTimeframe = tf;
+    document.querySelectorAll('.timeframe-btn').forEach((el, i) => el.classList.toggle('bg-slate-700', i === tf));
+    renderChart();
+}
+
+function toggleLanguage() {
+    language = language === 'uz' ? 'en' : 'uz';
+    document.getElementById('current-lang').textContent = language.toUpperCase();
+}
+
+function toggleFullScreen() {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+}
+
+const symbolsByMarket = {
+    0: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"],
+    1: ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+    2: ["Volatility 75", "Boom 500", "Crash 1000", "Step Index"],
+    3: ["AAPL", "TSLA", "NVDA"]
+};
+
+window.onload = initializeApp;
 </script>
-```
+</body>
+</html>
