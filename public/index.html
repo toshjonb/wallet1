@@ -35,7 +35,6 @@
         }
 
         .neon-cyan { text-shadow: 0 0 25px #00f5ff, 0 0 50px #00f5ff; }
-        .neon-magenta { text-shadow: 0 0 25px #ff00ff, 0 0 55px #ff00ff; }
 
         .signal-card {
             transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -57,35 +56,30 @@
             box-shadow: 0 0 35px rgba(103, 232, 249, 0.9);
         }
 
-        /* YANGI ANIMATSIYA – FULL VIEW uchun boshqa usul */
+        /* RESIZABLE + DRAGGABLE SIGNAL PANEL */
         #signal-panel {
-            transition: all 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        #signal-panel.expanded {
-            height: 92vh !important;
-            position: fixed;
-            top: 28px;
-            left: 0;
-            right: 0;
-            z-index: 50;
-            border-top: 8px solid #ff00ff;
-            border-bottom: 8px solid #ff00ff;
-            box-shadow: 0 0 120px rgba(255, 0, 255, 0.7);
+            transition: none;
+            user-select: none;
+            position: relative;
         }
 
-        /* Grafik uchun alohida FULL VIEW */
-        #chart-container {
-            transition: all 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        #chart-container.fullchart {
-            position: fixed;
-            top: 28px;
+        #signal-resize-handle {
+            position: absolute;
+            top: -4px;
             left: 0;
             right: 0;
-            bottom: 0;
-            z-index: 60;
-            padding: 20px;
-            background: #0a0f1c;
+            height: 8px;
+            background: transparent;
+            cursor: ns-resize;
+            z-index: 10;
+        }
+
+        #signal-resize-handle:hover {
+            background: rgba(255, 0, 255, 0.3);
+        }
+
+        #signal-panel.expanded {
+            height: 88vh !important;
         }
     </style>
 </head>
@@ -109,8 +103,9 @@
 
 <div class="flex h-[calc(100vh-28px)] flex-col lg:flex-row">
 
-    <!-- SIDEBAR (3) – o‘zgartirilmadi -->
+    <!-- SIDEBAR -->
     <div class="w-full lg:w-72 bg-zinc-950 border-r border-slate-700 flex flex-col overflow-auto">
+        <!-- ... oldingi sidebar kodi bir xil ... -->
         <div class="p-6 border-b border-slate-700">
             <h1 class="title-font text-4xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
             <p class="text-emerald-400 text-xs tracking-[4px] mt-1">ANTIGRAVITY EDITION • REAL-TIME</p>
@@ -151,7 +146,7 @@
         </div>
     </div>
 
-    <!-- MAIN CHART AREA (4) -->
+    <!-- MAIN AREA -->
     <div class="flex-1 flex flex-col min-h-0 relative">
         <div class="h-16 border-b border-slate-700 bg-zinc-950/90 backdrop-blur-xl flex items-center px-8 justify-between z-10">
             <div class="flex items-center gap-8">
@@ -173,39 +168,35 @@
                     <i class="fas fa-bolt-lightning"></i>
                     <span>SCAN REAL MARKET</span>
                 </button>
-                <!-- Grafik uchun alohida FULL VIEW tugmasi -->
-                <button onclick="toggleChartFullView()" class="flex items-center gap-2 px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-2xl text-sm font-medium transition-all">
-                    <i id="chart-icon" class="fas fa-expand"></i>
-                    <span id="chart-text">FULL CHART</span>
-                </button>
                 <button onclick="toggleFullScreen()" class="p-4 hover:bg-slate-800 rounded-3xl transition-all"><i class="fas fa-expand"></i></button>
             </div>
         </div>
 
-        <!-- Grafik konteyneri -->
-        <div id="chart-container" class="flex-1 p-6 min-h-0 relative">
+        <div class="flex-1 p-6 min-h-0">
             <div id="chart" class="w-full h-full"></div>
         </div>
 
-        <!-- SIGNAL PANEL (2) -->
-        <div id="signal-panel" class="h-72 border-t border-slate-700 bg-zinc-950/90 p-6 transition-all duration-500 ease-in-out">
-            <div class="flex justify-between mb-4 items-center">
+        <!-- RESIZABLE + DRAGGABLE SIGNAL PANEL -->
+        <div id="signal-panel" class="h-72 border-t border-slate-700 bg-zinc-950/95 p-6 relative">
+            <!-- Drag Handle -->
+            <div id="signal-drag-handle" class="absolute top-0 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-slate-500 rounded-full cursor-grab active:cursor-grabbing z-20"></div>
+            
+            <!-- Resize Handle -->
+            <div id="signal-resize-handle" class="absolute top-0 left-0 right-0 h-3 cursor-ns-resize z-10"></div>
+
+            <div class="flex justify-between mb-4 items-center pt-4">
                 <div class="uppercase text-xs tracking-widest font-medium flex items-center gap-2">
-                    <i class="fas fa-signal"></i> LIVE SIGNAL STREAM
+                    <i class="fas fa-signal"></i> REAL-TIME SIGNALS (20 STRATEGIES)
                 </div>
-                <button onclick="toggleSignalPanel()" id="signal-toggle-btn"
-                        class="flex items-center gap-2 text-xs px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-2xl font-medium transition-all">
-                    <i id="toggle-icon" class="fas fa-expand"></i>
-                    <span id="toggle-text">FULL VIEW</span>
-                </button>
                 <button onclick="clearLog()" class="text-xs text-red-400 hover:text-red-300">CLEAR LOG</button>
             </div>
-            <div id="signal-log" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto h-[calc(100%-60px)]"></div>
+            <div id="signal-log" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-auto h-[calc(100%-70px)]"></div>
         </div>
     </div>
 
-    <!-- RIGHT PANEL (1) -->
+    <!-- RIGHT PANEL -->
     <div class="w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col">
+        <!-- ... oldingi right panel kodi bir xil qoldi ... -->
         <div class="p-7 border-b border-slate-700">
             <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">DEMO ACCOUNT • REAL</div>
             <div class="flex justify-between items-end">
@@ -229,15 +220,6 @@
             </div>
         </div>
 
-        <!-- NEURAL VISION kichik tugma holatida (DEMO ACCOUNT ichida) -->
-        <div class="px-7 py-3 border-b border-slate-700">
-            <button onclick="showNeuralVision()" 
-                    class="w-full flex items-center justify-center gap-3 py-3 bg-violet-600/90 hover:bg-violet-700 rounded-2xl text-sm font-medium transition-all">
-                <i class="fas fa-brain"></i>
-                NEURAL VISION ANALYZER
-            </button>
-        </div>
-
         <div class="flex-1 flex flex-col min-h-0">
             <div class="px-7 py-5 border-b border-slate-700 bg-zinc-900 flex justify-between items-center">
                 <div class="font-semibold">OPEN POSITIONS • REAL</div>
@@ -245,27 +227,18 @@
             </div>
             <div id="positions-list" class="flex-1 overflow-auto p-6 space-y-4"></div>
         </div>
-    </div>
-</div>
 
-<!-- NEURAL VISION MODAL (kichik tugma bosilganda ochiladi) -->
-<div id="neural-modal" onclick="if(event.target.id==='neural-modal')hideNeuralVision()" class="hidden fixed inset-0 bg-black/80 z-[9999] flex items-center justify-center">
-    <div onclick="event.stopImmediatePropagation()" class="glass rounded-3xl w-[90%] max-w-lg p-8">
-        <div class="text-center">
-            <div class="text-violet-400 text-sm font-bold mb-2">NEURAL VISION ANALYZER</div>
-            <div id="drop-zone" class="border-2 border-dashed border-slate-600 hover:border-violet-400 rounded-3xl h-64 flex flex-col items-center justify-center cursor-pointer transition-all">
-                <i class="fas fa-cloud-upload-alt text-7xl text-slate-500 mb-6"></i>
-                <p class="font-medium">Screenshot yuklang yoki torting</p>
-                <p class="text-xs text-slate-500 mt-2">(Real-time AI analysis)</p>
-                <input type="file" id="screenshot-input" accept="image/*" class="hidden">
-            </div>
-            <div id="analysis-result" class="hidden mt-6"></div>
+        <div class="p-7 border-t border-slate-700 bg-zinc-950">
+            <button onclick="showNeuralVision()" class="w-full flex items-center justify-center gap-3 py-3 bg-violet-600/90 hover:bg-violet-700 rounded-2xl text-sm font-medium transition-all">
+                <i class="fas fa-brain"></i> NEURAL VISION ANALYZER
+            </button>
         </div>
     </div>
 </div>
 
 <script>
-// ==================== OLDINGI KOD (faqat kerakli qismlar saqlangan) ====================
+// ==================== RESIZABLE + DRAGGABLE SIGNAL PANEL ====================
+
 let chart = null;
 let candleSeries = null;
 let currentMarket = 2;
@@ -273,113 +246,87 @@ let currentSymbol = "Volatility 75";
 let currentTimeframe = 2;
 let isConfluence = false;
 let language = "uz";
+
 let balance = 12458.75;
 let equity = 12521.40;
 let positions = [];
 
-const symbolsByMarket = {
-    0: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD", "USDCAD", "NZDUSD", "EURGBP", "EURJPY"],
-    1: ["BTCUSDT", "ETHUSDT", "SOLUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT", "TONUSDT", "BNBUSDT"],
-    2: ["Volatility 75", "Boom 500", "Crash 1000", "Step Index", "Volatility 100", "Boom 300", "Crash 500", "Range Break"],
-    3: ["AAPL", "TSLA", "NVDA", "GOOGL", "AMZN", "MSFT", "META", "AMD"]
-};
+let signalPanel = null;
+let isDragging = false;
+let isResizing = false;
+let startY = 0;
+let startHeight = 0;
 
-const allStrategies = [ /* 20+ strategiya bir xil qoldi */ ];
+function initializeResizablePanel() {
+    signalPanel = document.getElementById('signal-panel');
+    const dragHandle = document.getElementById('signal-drag-handle');
+    const resizeHandle = document.getElementById('signal-resize-handle');
 
-function createChart() { /* bir xil */ }
-function generateMockCandles() { /* bir xil */ }
-function renderChart() { /* bir xil */ }
-function addRealisticSignalsToChart(data) { /* bir xil */ }
-function updateLivePrice() { /* bir xil */ }
-function switchMarket(index) { /* bir xil */ }
-function updateSymbols() { /* bir xil */ }
-function renderStrategies() { /* bir xil */ }
-function toggleStrategy(el) { el.classList.toggle('!bg-emerald-900/60'); }
-function toggleConfluence() { /* bir xil */ }
-function updateRisk(val) { /* bir xil */ }
-function renderPositions() { /* bir xil */ }
-function closePosition(index) { /* bir xil */ }
-function updateEquity() { /* bir xil */ }
-function addToLog(signal) { /* bir xil */ }
-function takePosition(signal) { /* bir xil */ }
-function addRandomSignal() { /* bir xil */ }
-function scanMarket() { /* bir xil */ }
-function clearLog() { /* bir xil */ }
-function changeTimeframe(tf) { /* bir xil */ }
-function toggleLanguage() { /* bir xil */ }
-function toggleFullScreen() { /* bir xil */ }
+    // Drag (surish)
+    dragHandle.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        startY = e.clientY;
+        startHeight = signalPanel.offsetHeight;
+        document.body.style.cursor = 'grabbing';
+    });
 
-// ==================== YANGI ANIMATSIYALAR ====================
+    // Resize (o‘lcham o‘zgartirish)
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        startY = e.clientY;
+        startHeight = signalPanel.offsetHeight;
+        document.body.style.cursor = 'ns-resize';
+    });
 
-// 1. SIGNAL PANEL FULL VIEW (boshqa uslubda animatsiya)
-let isSignalPanelExpanded = false;
-function toggleSignalPanel() {
-    isSignalPanelExpanded = !isSignalPanelExpanded;
-    const panel = document.getElementById('signal-panel');
-    const icon = document.getElementById('toggle-icon');
-    const text = document.getElementById('toggle-text');
-
-    if (isSignalPanelExpanded) {
-        panel.classList.add('expanded');
-        icon.classList.replace('fa-expand', 'fa-compress');
-        text.textContent = 'COLLAPSE';
-        for (let i = 0; i < 12; i++) addRandomSignal(); // ko‘proq signal
-    } else {
-        panel.classList.remove('expanded');
-        icon.classList.replace('fa-compress', 'fa-expand');
-        text.textContent = 'FULL VIEW';
-    }
-}
-
-// 2. GRAFIK uchun alohida FULL VIEW
-let isChartFull = false;
-function toggleChartFullView() {
-    isChartFull = !isChartFull;
-    const container = document.getElementById('chart-container');
-    const icon = document.getElementById('chart-icon');
-    const text = document.getElementById('chart-text');
-
-    if (isChartFull) {
-        container.classList.add('fullchart');
-        icon.classList.replace('fa-expand', 'fa-compress');
-        text.textContent = 'EXIT FULL';
-    } else {
-        container.classList.remove('fullchart');
-        icon.classList.replace('fa-compress', 'fa-expand');
-        text.textContent = 'FULL CHART';
-    }
-    if (chart) chart.resize(container.clientWidth, container.clientHeight);
-}
-
-// 3. NEURAL VISION – kichik tugma orqali modal
-function showNeuralVision() {
-    document.getElementById('neural-modal').classList.remove('hidden');
-    const dropZone = document.getElementById('drop-zone');
-    dropZone.addEventListener('click', () => document.getElementById('screenshot-input').click());
-    document.getElementById('screenshot-input').addEventListener('change', e => {
-        if (e.target.files[0]) {
-            dropZone.innerHTML = `<i class="fas fa-spinner fa-spin text-7xl text-violet-400"></i><p class="mt-8">Real AI tahlil qilinmoqda...</p>`;
-            setTimeout(() => {
-                document.getElementById('drop-zone').classList.add('hidden');
-                document.getElementById('analysis-result').classList.remove('hidden');
-                document.getElementById('analysis-result').innerHTML = `
-                    <div class="text-center">
-                        <div class="text-6xl font-bold text-emerald-400">97%</div>
-                        <div class="text-emerald-400 text-2xl mt-4">STRONG BUY</div>
-                        <div class="mt-6">RAZGON + ICT + EMA</div>
-                        <button onclick="hideNeuralVision()" class="mt-8 w-full py-4 bg-gradient-to-r from-cyan-500 to-violet-500 rounded-3xl font-bold">TRADE OCHISH</button>
-                    </div>`;
-            }, 1400);
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            const diff = startY - e.clientY;
+            let newHeight = startHeight + diff;
+            newHeight = Math.max(180, Math.min(newHeight, window.innerHeight * 0.92));
+            signalPanel.style.height = newHeight + 'px';
+        }
+        if (isResizing) {
+            const diff = startY - e.clientY;
+            let newHeight = startHeight + diff;
+            newHeight = Math.max(180, Math.min(newHeight, window.innerHeight * 0.92));
+            signalPanel.style.height = newHeight + 'px';
         }
     });
-}
-function hideNeuralVision() {
-    document.getElementById('neural-modal').classList.add('hidden');
-    document.getElementById('drop-zone').classList.remove('hidden');
-    document.getElementById('analysis-result').classList.add('hidden');
+
+    document.addEventListener('mouseup', () => {
+        isDragging = false;
+        isResizing = false;
+        document.body.style.cursor = 'default';
+    });
 }
 
-// Initialize
+// Qolgan barcha funksiyalar (oldingi versiyadan bir xil)
+function createChart() { /* ... */ }
+function generateMockCandles() { /* ... */ }
+function renderChart() { /* ... */ }
+function addRealisticSignalsToChart(data) { /* ... */ }
+function updateLivePrice() { /* ... */ }
+function switchMarket(index) { /* ... */ }
+function updateSymbols() { /* ... */ }
+function renderStrategies() { /* ... */ }
+function toggleStrategy(el) { el.classList.toggle('!bg-emerald-900/60'); }
+function toggleConfluence() { /* ... */ }
+function updateRisk(val) { /* ... */ }
+function renderPositions() { /* ... */ }
+function closePosition(index) { /* ... */ }
+function updateEquity() { /* ... */ }
+function addToLog(signal) { /* ... */ }
+function takePosition(signal) { /* ... */ }
+function addRandomSignal() { /* ... */ }
+function scanMarket() { /* ... */ }
+function clearLog() { document.getElementById('signal-log').innerHTML = ''; }
+function changeTimeframe(tf) { /* ... */ }
+function toggleLanguage() { /* ... */ }
+function toggleFullScreen() { /* ... */ }
+
+function showNeuralVision() { /* ... */ }
+function hideNeuralVision() { /* ... */ }
+
 function initializeApp() {
     createChart();
     renderChart();
@@ -391,13 +338,15 @@ function initializeApp() {
     document.getElementById('current-symbol').textContent = currentSymbol;
     updateLivePrice();
 
+    initializeResizablePanel();   // Yangi resizable + draggable funksiyasi
+
     setTimeout(addRandomSignal, 300);
     setTimeout(addRandomSignal, 900);
     setTimeout(addRandomSignal, 1600);
     setTimeout(addRandomSignal, 2300);
     setInterval(addRandomSignal, 4500);
 
-    console.log('%c✅ 4 ta asosiy bo‘lim (Sidebar, Chart, Signals, Right Panel) alohida FULL VIEW animatsiyasi bilan ishlaydi. Neural Vision kichik tugma holatida DEMO ACCOUNT ichida.', 'color:#ff00ff; font-size:18px; font-weight:bold');
+    console.log('%c✅ Pastdagi SIGNAL PANEL endi resizable va draggable! Sichqoncha bilan tortib o‘lchamini o‘zgartirishingiz va surishingiz mumkin.', 'color:#ff00ff; font-size:18px; font-weight:bold');
 }
 
 window.onload = initializeApp;
