@@ -18,7 +18,7 @@
         .title-font { font-family: 'Space Grotesk', sans-serif; }
 
         .glass {
-            background: rgba(15, 23, 42, 0.88);
+            background: rgba(15, 23, 42, 0.85);
             backdrop-filter: blur(28px);
             border: 1px solid rgba(148, 163, 184, 0.35);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -35,14 +35,13 @@
 
         .neon-cyan { text-shadow: 0 0 25px #00f5ff, 0 0 50px #00f5ff; }
 
-        /* SIGNAL PANEL - SILLIQ ANIMATSIYA BILAN TO‘LIQ TEPAGA OCHILISH */
+        /* SIGNAL PANEL - TO‘LIQ TEPAGA OCHILADIGAN RESIZABLE + DRAGGABLE */
         #signal-panel {
-            height: 280px;
             position: relative;
-            transition: height 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+            height: 280px;
+            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             user-select: none;
             z-index: 40;
-            border-top: 1px solid #334155;
         }
 
         #signal-panel.fullscreen {
@@ -60,7 +59,7 @@
             top: 8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 70px;
             height: 6px;
             background: #64748b;
             border-radius: 9999px;
@@ -75,10 +74,10 @@
 
         #signal-resize-handle {
             position: absolute;
-            top: -6px;
+            top: -8px;
             left: 0;
             right: 0;
-            height: 14px;
+            height: 16px;
             cursor: ns-resize;
             z-index: 30;
         }
@@ -104,7 +103,7 @@
 
 <div class="flex h-[calc(100vh-28px)] flex-col lg:flex-row">
 
-    <!-- SIDEBAR (o‘zgartirilmagan) -->
+    <!-- SIDEBAR -->
     <div class="w-full lg:w-72 bg-zinc-950 border-r border-slate-700 flex flex-col overflow-auto">
         <div class="p-6 border-b border-slate-700">
             <h1 class="title-font text-4xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
@@ -176,10 +175,10 @@
             <div id="chart" class="w-full h-full"></div>
         </div>
 
-        <!-- PASTDAGI SIGNAL PANEL - TO‘LIQ TEPAGA OCHILADIGAN -->
+        <!-- PASTDAGI SIGNAL PANEL - TO‘LIQ TEPAGA OCHILADI -->
         <div id="signal-panel" class="glass border-t border-slate-700 p-6 relative">
             <!-- Drag Handle -->
-            <div id="signal-drag-handle" class="absolute top-3 left-1/2 -translate-x-1/2 w-20 h-1.5 bg-slate-400 rounded-full cursor-grab active:cursor-grabbing z-50"></div>
+            <div id="signal-drag-handle" class="absolute top-3 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-slate-400 rounded-full cursor-grab active:cursor-grabbing z-50"></div>
             
             <!-- Resize Handle -->
             <div id="signal-resize-handle" class="absolute -top-2 left-0 right-0 h-8 cursor-ns-resize z-40"></div>
@@ -230,7 +229,7 @@
 </div>
 
 <script>
-// ==================== TO‘LIQ ISHLAYDIGAN RESIZABLE + DRAGGABLE + FULLSCREEN ====================
+// ==================== TO‘LIQ TEPAGA OCHILADIGAN RESIZABLE + DRAGGABLE PANEL ====================
 
 let chart = null;
 let candleSeries = null;
@@ -273,12 +272,12 @@ function initializeResizablePanel() {
         const diff = startY - e.clientY;
         let newHeight = startHeight + diff;
 
-        // Agar yuqoriga juda yuqori tortsa — to‘liq fullscreen
-        if (newHeight > window.innerHeight * 0.75) {
+        // To‘liq tepaga ochilish chegarasi
+        if (newHeight > window.innerHeight * 0.85) {
             signalPanel.classList.add('fullscreen');
         } else {
             signalPanel.classList.remove('fullscreen');
-            newHeight = Math.max(200, Math.min(newHeight, window.innerHeight - 120));
+            newHeight = Math.max(200, Math.min(newHeight, window.innerHeight - 100));
             signalPanel.style.height = newHeight + 'px';
         }
     });
@@ -290,7 +289,7 @@ function initializeResizablePanel() {
     });
 }
 
-// Qolgan funksiyalar (oldingi versiyadan)
+// Qolgan funksiyalar (oldingi versiyadan bir xil)
 function createChart() {
     const container = document.getElementById('chart');
     if (chart) chart.remove();
@@ -425,7 +424,7 @@ function updateRisk(val) {
 function renderPositions() {
     const container = document.getElementById('positions-list');
     container.innerHTML = positions.length === 0 ? `<div class="text-center py-16 text-slate-500">Ochiq pozitsiya yo‘q</div>` : '';
-    // oddiy render (oldingi kabi)
+    // ... (oldingi renderPositions kodi)
 }
 
 function addToLog(signal) {
@@ -521,7 +520,7 @@ function initializeApp() {
     setTimeout(addRandomSignal, 1800);
     setInterval(addRandomSignal, 4500);
 
-    console.log('%c✅ Pastdagi SIGNAL PANEL endi silliq animatsiya bilan to‘liq tepaga ochiladi va tortib o‘zgartirish mumkin.', 'color:#ff00ff; font-size:18px; font-weight:bold');
+    console.log('%c✅ Pastdagi SIGNAL PANEL endi to‘liq tepaga ochiladigan resizable + draggable holatda!', 'color:#ff00ff; font-size:18px; font-weight:bold');
 }
 
 window.onload = initializeApp;
