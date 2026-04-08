@@ -2,7 +2,7 @@
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Trading Sniper Signal – Antigravity Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
@@ -13,104 +13,91 @@
         body {
             font-family: 'Inter', system-ui, sans-serif;
             background: linear-gradient(180deg, #0a0f1c 0%, #02040a 100%);
+            overflow: hidden;
         }
-        .title-font {
-            font-family: 'Space Grotesk', sans-serif;
-        }
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
 
         .glass {
-            background: rgba(15, 23, 42, 0.72);
+            background: rgba(15, 23, 42, 0.75);
             backdrop-filter: blur(24px);
             border: 1px solid rgba(148, 163, 184, 0.25);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
         }
 
         .razgon-glow {
-            box-shadow: 0 0 35px #ff00ff,
-                        0 0 60px rgba(255, 0, 255, 0.7),
-                        inset 0 0 20px rgba(255, 0, 255, 0.3);
-            animation: razgonPulse 2.4s infinite alternate ease-in-out;
+            box-shadow: 0 0 35px #ff00ff, 0 0 70px rgba(255, 0, 255, 0.75), inset 0 0 25px rgba(255, 0, 255, 0.4);
+            animation: razgonPulse 2.2s infinite alternate ease-in-out;
         }
 
         @keyframes razgonPulse {
-            from { 
-                box-shadow: 0 0 30px #ff00ff, 0 0 50px rgba(255, 0, 255, 0.5); 
-            }
-            to { 
-                box-shadow: 0 0 50px #ff00ff, 0 0 85px rgba(255, 0, 255, 0.8), 
-                            inset 0 0 30px rgba(255, 0, 255, 0.4); 
-            }
+            from { box-shadow: 0 0 30px #ff00ff, 0 0 55px rgba(255, 0, 255, 0.6); }
+            to { box-shadow: 0 0 55px #ff00ff, 0 0 90px rgba(255, 0, 255, 0.85), inset 0 0 35px rgba(255, 0, 255, 0.5); }
         }
 
-        .neon-cyan {
-            text-shadow: 0 0 15px #00f5ff,
-                         0 0 30px #00f5ff;
-        }
-
-        .neon-magenta {
-            text-shadow: 0 0 15px #ff00ff,
-                         0 0 30px #ff00ff;
-        }
+        .neon-cyan { text-shadow: 0 0 20px #00f5ff, 0 0 35px #00f5ff; }
+        .neon-magenta { text-shadow: 0 0 20px #ff00ff, 0 0 40px #ff00ff; }
 
         .signal-card {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1), box-shadow 0.3s;
         }
         .signal-card:hover {
-            transform: translateY(-4px) scale(1.02);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px -10px rgba(0, 245, 255, 0.25);
         }
 
         #chart {
             border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 0 60px rgba(0, 245, 255, 0.15);
+            box-shadow: 0 0 50px rgba(0, 245, 255, 0.12);
         }
 
         .market-tab.active {
-            background: linear-gradient(to right, #22d3ee, #a855f7);
-            color: black;
+            background: linear-gradient(to right, #67e8f9, #c084fc);
+            color: #0a0f1c;
             font-weight: 700;
-            box-shadow: 0 0 20px rgba(34, 211, 238, 0.6);
+            box-shadow: 0 0 25px rgba(103, 232, 249, 0.7);
         }
 
-        .drop-zone {
-            transition: all 0.4s ease;
+        @media (max-width: 1024px) {
+            .sidebar { width: 260px; }
+            .right-panel { width: 320px; }
+        }
+        
+        @media (max-width: 768px) {
+            .flex { flex-direction: column; }
+            .sidebar, .right-panel { width: 100%; height: auto; }
+            #chart { height: 380px !important; }
         }
     </style>
 </head>
-<body class="text-slate-200 overflow-hidden">
+<body class="text-slate-200">
 
-<div class="flex h-screen">
+<div class="flex h-screen flex-col lg:flex-row">
 
     <!-- Sidebar -->
-    <div class="w-72 bg-zinc-950 border-r border-slate-700 flex flex-col">
+    <div class="sidebar w-full lg:w-72 bg-zinc-950 border-r border-slate-700 flex flex-col lg:min-h-screen">
         <div class="p-6 border-b border-slate-700">
             <h1 class="title-font text-4xl font-bold tracking-tighter neon-cyan">SNIPER</h1>
             <p class="text-emerald-400 text-xs tracking-[3px] mt-1">ANTIGRAVITY EDITION</p>
         </div>
 
-        <!-- Market Tabs -->
         <div class="p-5">
             <div id="market-tabs" class="grid grid-cols-4 gap-2">
-                <button onclick="switchMarket(0)" data-market="0" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all">Forex</button>
-                <button onclick="switchMarket(1)" data-market="1" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all">Crypto</button>
-                <button onclick="switchMarket(2)" data-market="2" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all active">Synthetic</button>
-                <button onclick="switchMarket(3)" data-market="3" class="market-tab py-3.5 text-sm font-medium rounded-2xl transition-all">Aksiyalar</button>
+                <button onclick="switchMarket(0)" data-market="0" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Forex</button>
+                <button onclick="switchMarket(1)" data-market="1" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Crypto</button>
+                <button onclick="switchMarket(2)" data-market="2" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all active">Synthetic</button>
+                <button onclick="switchMarket(3)" data-market="3" class="market-tab py-3 text-sm font-medium rounded-2xl transition-all">Aksiyalar</button>
             </div>
         </div>
 
-        <!-- Symbols -->
         <div class="px-5">
             <div class="text-xs text-slate-400 mb-3 px-1">SYMBOLS</div>
             <div id="symbols-list" class="flex flex-wrap gap-2"></div>
         </div>
 
-        <!-- Strategies -->
         <div class="mt-8 px-5">
             <div class="flex justify-between items-center mb-4 px-1">
                 <div class="text-xs uppercase tracking-widest text-slate-400">STRATEGIES</div>
-                <button onclick="toggleConfluence()" id="confluence-btn"
-                        class="px-5 py-1.5 text-xs rounded-2xl transition-all bg-slate-800 hover:bg-slate-700">
+                <button onclick="toggleConfluence()" id="confluence-btn" class="px-5 py-1.5 text-xs rounded-2xl transition-all bg-slate-800 hover:bg-slate-700">
                     <span id="confluence-label" class="font-semibold">Confluence OFF</span>
                 </button>
             </div>
@@ -118,70 +105,69 @@
         </div>
 
         <div class="mt-auto p-5 border-t border-slate-700">
-            <button onclick="toggleLanguage()" 
-                    class="w-full py-4 bg-slate-900 hover:bg-slate-800 rounded-3xl flex items-center justify-center gap-3 text-sm font-medium">
+            <button onclick="toggleLanguage()" class="w-full py-4 bg-slate-900 hover:bg-slate-800 rounded-3xl flex items-center justify-center gap-3 text-sm">
                 <i class="fas fa-globe text-cyan-400"></i>
                 <span id="current-lang">UZ</span>
             </button>
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="flex-1 flex flex-col">
+    <!-- Main Area -->
+    <div class="flex-1 flex flex-col min-h-0">
         <!-- Top Bar -->
-        <div class="h-16 border-b border-slate-700 bg-zinc-950/80 backdrop-blur-xl flex items-center px-8 justify-between z-10">
-            <div class="flex items-center gap-10">
-                <div class="flex items-center gap-5">
-                    <span id="current-symbol" class="font-mono text-3xl font-bold text-white"></span>
-                    <span id="current-price" class="font-mono text-4xl font-bold text-emerald-400 neon-cyan"></span>
+        <div class="h-16 border-b border-slate-700 bg-zinc-950/90 backdrop-blur-xl flex items-center px-6 lg:px-8 justify-between z-10">
+            <div class="flex items-center gap-6 lg:gap-10">
+                <div class="flex items-center gap-4">
+                    <span id="current-symbol" class="font-mono text-2xl lg:text-3xl font-bold"></span>
+                    <span id="current-price" class="font-mono text-3xl lg:text-4xl font-bold text-emerald-400 neon-cyan"></span>
                 </div>
-                <div id="timeframes" class="flex bg-zinc-900 rounded-3xl p-1 shadow-inner">
-                    <div onclick="changeTimeframe(0)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">M1</div>
-                    <div onclick="changeTimeframe(1)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">M5</div>
-                    <div onclick="changeTimeframe(2)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm bg-slate-700">M15</div>
-                    <div onclick="changeTimeframe(3)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">H1</div>
-                    <div onclick="changeTimeframe(4)" class="timeframe-btn px-6 py-2 rounded-3xl cursor-pointer text-sm">H4</div>
+                <div id="timeframes" class="flex bg-zinc-900 rounded-3xl p-1 text-sm">
+                    <div onclick="changeTimeframe(0)" class="timeframe-btn px-4 lg:px-6 py-2 rounded-3xl cursor-pointer">M1</div>
+                    <div onclick="changeTimeframe(1)" class="timeframe-btn px-4 lg:px-6 py-2 rounded-3xl cursor-pointer">M5</div>
+                    <div onclick="changeTimeframe(2)" class="timeframe-btn px-4 lg:px-6 py-2 rounded-3xl cursor-pointer bg-slate-700">M15</div>
+                    <div onclick="changeTimeframe(3)" class="timeframe-btn px-4 lg:px-6 py-2 rounded-3xl cursor-pointer">H1</div>
+                    <div onclick="changeTimeframe(4)" class="timeframe-btn px-4 lg:px-6 py-2 rounded-3xl cursor-pointer">H4</div>
                 </div>
             </div>
 
-            <div class="flex items-center gap-5">
+            <div class="flex items-center gap-4">
                 <button onclick="scanMarket()" 
-                        class="flex items-center gap-3 bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 px-8 py-3.5 rounded-3xl font-semibold text-sm shadow-lg transition-all active:scale-95">
+                        class="flex items-center gap-3 bg-gradient-to-r from-cyan-500 via-violet-500 to-fuchsia-500 hover:brightness-110 px-6 lg:px-8 py-3 rounded-3xl font-semibold text-sm shadow-lg transition-all active:scale-95">
                     <i class="fas fa-bolt-lightning"></i>
-                    <span>SCAN MARKET</span>
+                    <span class="hidden sm:inline">SCAN MARKET</span>
                 </button>
-                <button onclick="toggleFullScreen()" class="p-4 text-slate-300 hover:text-white hover:bg-slate-800 rounded-3xl transition-all">
+                <button onclick="toggleFullScreen()" class="p-3 lg:p-4 text-slate-300 hover:text-white hover:bg-slate-800 rounded-3xl transition-all">
                     <i class="fas fa-expand"></i>
                 </button>
             </div>
         </div>
 
         <!-- Chart -->
-        <div class="flex-1 p-6">
+        <div class="flex-1 p-4 lg:p-6 min-h-0">
             <div id="chart" class="w-full h-full"></div>
         </div>
 
         <!-- Signal Log -->
-        <div class="h-72 border-t border-slate-700 bg-zinc-950/90 p-6">
+        <div class="h-64 lg:h-72 border-t border-slate-700 bg-zinc-950/90 p-4 lg:p-6 overflow-hidden">
             <div class="flex justify-between items-center mb-4">
                 <div class="uppercase text-xs tracking-widest font-medium flex items-center gap-2">
-                    <i class="fas fa-signal"></i> LIVE SIGNAL STREAM
+                    <i class="fas fa-signal"></i> LIVE SIGNALS
                 </div>
-                <button onclick="clearLog()" class="text-xs text-red-400 hover:text-red-300">CLEAR LOG</button>
+                <button onclick="clearLog()" class="text-xs text-red-400 hover:text-red-300">CLEAR</button>
             </div>
-            <div id="signal-log" class="grid grid-cols-3 gap-4 overflow-auto h-full"></div>
+            <div id="signal-log" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 overflow-auto h-full pb-2"></div>
         </div>
     </div>
 
     <!-- Right Panel -->
-    <div class="w-96 bg-zinc-950 border-l border-slate-700 flex flex-col">
-        <!-- Account -->
-        <div class="p-7 border-b border-slate-700">
-            <div class="text-xs uppercase tracking-[2px] text-slate-400 mb-2">DEMO ACCOUNT</div>
-            <div class="flex justify-between">
+    <div class="right-panel w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col lg:min-h-screen">
+        <!-- Account Info -->
+        <div class="p-6 lg:p-7 border-b border-slate-700">
+            <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">DEMO ACCOUNT</div>
+            <div class="flex justify-between items-end">
                 <div>
-                    <div id="balance" class="text-4xl font-bold font-mono text-white">$12,458.75</div>
-                    <div id="equity" class="text-emerald-400 text-lg font-medium">$12,521.40 <span class="text-xs">(+0.50%)</span></div>
+                    <div id="balance" class="text-4xl font-bold font-mono">$12,458.75</div>
+                    <div id="equity" class="text-emerald-400 text-lg">$12,521.40 <span class="text-xs">(+0.50%)</span></div>
                 </div>
                 <div class="text-right">
                     <div class="text-xs text-slate-400">OPEN P/L</div>
@@ -190,19 +176,18 @@
             </div>
         </div>
 
-        <!-- Risk -->
-        <div class="p-7 border-b border-slate-700">
-            <div class="flex justify-between mb-3">
-                <span class="text-sm text-slate-400">Risk per trade</span>
-                <span id="risk-value" class="font-mono text-cyan-400 font-bold">1.8%</span>
+        <!-- Risk Management -->
+        <div class="p-6 lg:p-7 border-b border-slate-700">
+            <div class="flex justify-between mb-3 text-sm">
+                <span class="text-slate-400">Risk per trade</span>
+                <span id="risk-value" class="font-mono font-bold text-cyan-400">1.8%</span>
             </div>
             <input type="range" min="0.1" max="5" step="0.1" value="1.8" 
-                   oninput="updateRisk(this.value)" 
-                   class="w-full accent-fuchsia-500">
-            <div class="grid grid-cols-2 gap-8 mt-6">
+                   oninput="updateRisk(this.value)" class="w-full accent-fuchsia-500">
+            <div class="grid grid-cols-2 gap-6 mt-6">
                 <div>
                     <div class="text-xs text-slate-400">Lot Size</div>
-                    <div id="lot-size" class="text-3xl font-bold font-mono text-white">0.21</div>
+                    <div id="lot-size" class="text-3xl font-bold font-mono">0.21</div>
                 </div>
                 <div>
                     <div class="text-xs text-slate-400">Est. Risk</div>
@@ -212,23 +197,22 @@
         </div>
 
         <!-- Positions -->
-        <div class="flex-1 flex flex-col">
-            <div class="px-7 py-5 border-b border-slate-700 bg-zinc-900 flex justify-between items-center">
+        <div class="flex-1 flex flex-col min-h-0">
+            <div class="px-6 py-5 border-b border-slate-700 bg-zinc-900 flex justify-between items-center">
                 <div class="font-semibold">OPEN POSITIONS</div>
-                <span id="positions-count" class="bg-slate-800 px-5 py-1 rounded-2xl text-xs">0</span>
+                <span id="positions-count" class="bg-slate-800 px-4 py-1 rounded-2xl text-xs">0</span>
             </div>
             <div id="positions-list" class="flex-1 overflow-auto p-6 space-y-4"></div>
         </div>
 
-        <!-- Neural Vision -->
-        <div class="p-7 border-t border-slate-700 bg-zinc-950">
+        <!-- Neural Vision Analyzer -->
+        <div class="p-6 border-t border-slate-700 bg-zinc-950">
             <div class="uppercase text-xs tracking-widest text-slate-400 mb-4 flex items-center gap-2">
                 <i class="fas fa-brain text-violet-400"></i> NEURAL VISION
             </div>
-            <div id="drop-zone" 
-                 class="drop-zone glass border-2 border-dashed border-slate-600 hover:border-violet-400 rounded-3xl h-52 flex flex-col items-center justify-center cursor-pointer">
-                <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
-                <p class="font-medium text-center">Screenshot yuklang<br> yoki shu yerga torting</p>
+            <div id="drop-zone" class="glass border-2 border-dashed border-slate-600 hover:border-violet-400 rounded-3xl h-52 flex flex-col items-center justify-center cursor-pointer transition-all">
+                <i class="fas fa-cloud-upload-alt text-5xl text-slate-500 mb-4"></i>
+                <p class="font-medium text-center px-4">Screenshot yuklang yoki torting</p>
                 <input type="file" id="screenshot-input" accept="image/*" class="hidden">
             </div>
             <div id="analysis-result" class="hidden mt-6"></div>
@@ -237,7 +221,7 @@
 </div>
 
 <script>
-// ==================== 8-BOSQICH: DIZAYN POLISHING + OLDINGI HAMMASI ====================
+// ==================== 9-BOSQICH: PERFORMANCE + MOBIL MOSLASHUV ====================
 
 let chart = null;
 let candleSeries = null;
@@ -250,7 +234,7 @@ let language = "uz";
 let balance = 12458.75;
 let equity = 12521.40;
 let positions = [];
-let tradeHistory = [];
+let resizeTimeout = null;
 
 const symbolsByMarket = {
     0: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"],
@@ -261,26 +245,37 @@ const symbolsByMarket = {
 
 function createChart() {
     const container = document.getElementById('chart');
-    if (chart) chart.remove();
+    if (chart) {
+        chart.remove();
+        chart = null;
+    }
+    
     chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
         height: container.clientHeight,
         layout: { background: { color: '#0a0f1c' }, textColor: '#94a3b8' },
         grid: { vertLines: { color: '#1e2937' }, horzLines: { color: '#1e2937' } },
         crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-        timeScale: { timeVisible: true, borderColor: '#334155' }
+        timeScale: { timeVisible: true, borderColor: '#334155' },
+        handleScroll: true,
+        handleScale: true
     });
+
     candleSeries = chart.addCandlestickSeries({
-        upColor: '#22c55e', downColor: '#ef4444',
-        borderUpColor: '#22c55e', borderDownColor: '#ef4444',
-        wickUpColor: '#86efac', wickDownColor: '#f87171'
+        upColor: '#22c55e',
+        downColor: '#ef4444',
+        borderUpColor: '#22c55e',
+        borderDownColor: '#ef4444',
+        wickUpColor: '#86efac',
+        wickDownColor: '#f87171'
     });
 }
 
-function generateMockCandles(count = 220) {
+function generateMockCandles(count = 200) {
     const data = [];
     let time = Math.floor(Date.now() / 1000) - count * 900;
     let price = currentMarket === 2 ? 1248.65 : currentMarket === 1 ? 65234 : 1.0874;
+
     for (let i = 0; i < count; i++) {
         const open = price;
         const vol = currentMarket === 2 ? 22 : currentMarket === 1 ? 220 : 0.012;
@@ -288,7 +283,14 @@ function generateMockCandles(count = 220) {
         const close = open + change;
         const high = Math.max(open, close) + Math.random() * vol * 1.4;
         const low = Math.min(open, close) - Math.random() * vol * 1.4;
-        data.push({ time, open: +open.toFixed(5), high: +high.toFixed(5), low: +low.toFixed(5), close: +close.toFixed(5) });
+
+        data.push({
+            time: time,
+            open: +open.toFixed(5),
+            high: +high.toFixed(5),
+            low: +low.toFixed(5),
+            close: +close.toFixed(5)
+        });
         price = close;
         time += 900;
     }
@@ -305,13 +307,16 @@ function renderChart() {
 
 function addConfluenceSignalsToChart(data) {
     const markers = [];
-    const points = [48, 82, 119, 155, 183];
+    const points = [45, 78, 112, 148, 175];
+
     points.forEach((idx, i) => {
         if (idx >= data.length) return;
         const isBuy = i % 2 === 0;
         const isRazgon = i === 0 || i === 3;
-        const score = isRazgon ? 97 : 83 + Math.floor(Math.random() * 11);
+        const score = isRazgon ? 97 : 84 + Math.floor(Math.random() * 10);
+
         if (isConfluence && score < 89) return;
+
         markers.push({
             time: data[idx].time,
             position: isBuy ? 'belowBar' : 'aboveBar',
@@ -324,19 +329,30 @@ function addConfluenceSignalsToChart(data) {
     candleSeries.setMarkers(markers);
 }
 
+// Resize handler with debounce
+function handleResize() {
+    if (resizeTimeout) clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(() => {
+        if (chart) {
+            const container = document.getElementById('chart');
+            chart.resize(container.clientWidth, container.clientHeight);
+        }
+    }, 150);
+}
+
 function updateLivePrice() {
     const priceEl = document.getElementById('current-price');
     let price = currentMarket === 2 ? 1248.65 : 65234;
     setInterval(() => {
         price += (Math.random() - 0.47) * (currentMarket === 2 ? 14 : 80);
         priceEl.textContent = price.toFixed(currentMarket === 2 ? 2 : 0);
-    }, 1700);
+    }, 1600);
 }
 
 function switchMarket(index) {
     currentMarket = index;
     document.querySelectorAll('#market-tabs button').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`#market-tabs button[data-market="${index}"]`).classList.add('active');
+    document.querySelector(`button[data-market="${index}"]`).classList.add('active');
     currentSymbol = symbolsByMarket[index][0];
     document.getElementById('current-symbol').textContent = currentSymbol;
     renderChart();
@@ -349,7 +365,7 @@ function updateSymbols() {
     symbolsByMarket[currentMarket].forEach(sym => {
         const active = sym === currentSymbol;
         const btn = document.createElement('button');
-        btn.className = `px-6 py-3 text-sm font-mono rounded-2xl transition-all ${active ? 'bg-gradient-to-r from-cyan-400 to-violet-400 text-black font-bold shadow-lg' : 'bg-slate-900 hover:bg-slate-800'}`;
+        btn.className = `px-5 py-2.5 text-sm font-mono rounded-2xl transition-all ${active ? 'bg-gradient-to-r from-cyan-400 to-violet-400 text-black font-bold' : 'bg-slate-900 hover:bg-slate-800'}`;
         btn.textContent = sym;
         btn.onclick = () => {
             currentSymbol = sym;
@@ -361,8 +377,7 @@ function updateSymbols() {
 }
 
 function renderStrategies() {
-    const container = document.getElementById('strategy-list');
-    container.innerHTML = `
+    document.getElementById('strategy-list').innerHTML = `
         <div onclick="toggleStrategy(this)" class="razgon-glow flex justify-between items-center bg-slate-900 p-5 rounded-3xl cursor-pointer border border-fuchsia-500/30">
             <div class="flex items-center gap-4"><span class="text-4xl">⚡</span><span class="font-semibold">Razgon Strategy</span></div>
             <span class="text-emerald-400 text-sm font-bold">ACTIVE</span>
@@ -400,22 +415,24 @@ function updateRisk(val) {
 
 function renderPositions() {
     const container = document.getElementById('positions-list');
-    container.innerHTML = positions.length === 0 ? 
-        `<div class="text-center py-16 text-slate-500">Hozircha ochiq pozitsiya yo‘q</div>` : '';
+    container.innerHTML = positions.length === 0 
+        ? `<div class="text-center py-12 text-slate-500">Ochiq pozitsiya yo‘q</div>` 
+        : '';
 
     positions.forEach((pos, i) => {
         const div = document.createElement('div');
         div.className = `glass rounded-3xl p-5 signal-card`;
         div.innerHTML = `
-            <div class="flex justify-between">
-                <span class="font-mono">${pos.symbol}</span>
+            <div class="flex justify-between items-center">
+                <span class="font-mono font-medium">${pos.symbol}</span>
                 <span class="${pos.type === 'BUY' ? 'text-emerald-400' : 'text-red-400'} font-bold">${pos.type}</span>
             </div>
-            <div class="text-xs mt-3 flex justify-between text-slate-400">
-                <span>${pos.lot} lot</span>
-                <span class="${pos.pl >= 0 ? 'text-emerald-400' : 'text-red-400'}">$${pos.pl}</span>
+            <div class="flex justify-between text-xs mt-3">
+                <span class="text-slate-400">${pos.lot} lot</span>
+                <span class="${pos.pl >= 0 ? 'text-emerald-400' : 'text-red-400'} font-medium">$${pos.pl.toFixed(2)}</span>
             </div>
-            <button onclick="closePosition(${i})" class="mt-4 w-full py-2 text-xs bg-red-500/80 hover:bg-red-600 rounded-2xl">YOPISH</button>
+            <button onclick="closePosition(${i}); event.stopImmediatePropagation();" 
+                    class="mt-4 w-full py-2 text-xs bg-red-500/80 hover:bg-red-600 rounded-2xl transition-colors">YOPISH</button>
         `;
         container.appendChild(div);
     });
@@ -431,45 +448,36 @@ function closePosition(index) {
     updateEquity();
 }
 
-function closeAllPositions() {
-    if (positions.length === 0 || !confirm("Barcha pozitsiyalarni yopish?")) return;
-    let total = positions.reduce((a, b) => a + b.pl, 0);
-    balance += total;
-    document.getElementById('balance').textContent = '$' + balance.toFixed(2);
-    positions = [];
-    renderPositions();
-    updateEquity();
-}
-
 function updateEquity() {
     const openPL = positions.reduce((sum, p) => sum + p.pl, 0);
     equity = balance + openPL;
     document.getElementById('equity').innerHTML = `$${equity.toFixed(2)} <span class="text-xs text-emerald-400">(+0.50%)</span>`;
-    document.getElementById('total-pl').textContent = (openPL >= 0 ? '+' : '') + '$' + openPL.toFixed(2);
-    document.getElementById('total-pl').className = openPL >= 0 ? "text-3xl font-bold text-emerald-400" : "text-3xl font-bold text-red-400";
+    const totalPlEl = document.getElementById('total-pl');
+    totalPlEl.textContent = (openPL >= 0 ? '+' : '') + '$' + openPL.toFixed(2);
+    totalPlEl.className = openPL >= 0 ? "text-3xl font-bold text-emerald-400" : "text-3xl font-bold text-red-400";
 }
 
 function addToLog(signal) {
     const container = document.getElementById('signal-log');
     const div = document.createElement('div');
-    div.className = `glass p-5 rounded-3xl signal-card ${signal.isBuy ? 'border-l-4 border-emerald-400' : 'border-l-4 border-red-400'}`;
+    div.className = `glass p-4 rounded-3xl signal-card ${signal.isBuy ? 'border-l-4 border-emerald-400' : 'border-l-4 border-red-400'}`;
     div.innerHTML = `
-        <div class="flex gap-4">
-            <div class="text-4xl">${signal.emoji}</div>
-            <div class="flex-1">
-                <div class="font-semibold text-base">${signal.name}</div>
-                <div class="text-xs text-slate-400">${signal.symbol} • M15</div>
-                <div class="text-cyan-400 font-medium">${signal.confluence}% confluence</div>
+        <div class="flex gap-3">
+            <div class="text-3xl flex-shrink-0">${signal.emoji}</div>
+            <div class="flex-1 min-w-0">
+                <div class="font-semibold leading-tight">${signal.name}</div>
+                <div class="text-xs text-slate-400 mt-0.5">${signal.symbol} • M15</div>
+                <div class="text-cyan-400 text-sm">${signal.confluence}% confluence</div>
             </div>
         </div>
     `;
     container.prepend(div);
-    if (container.children.length > 9) container.removeChild(container.lastChild);
+    if (container.children.length > 12) container.removeChild(container.lastChild);
 }
 
 function takePosition(signal) {
     const lot = parseFloat(document.getElementById('lot-size').textContent) || 0.21;
-    const pl = (Math.random() * 480 - 90).toFixed(2);
+    const pl = (Math.random() * 520 - 110).toFixed(2);
     positions.unshift({
         symbol: currentSymbol,
         type: signal.isBuy ? 'BUY' : 'SELL',
@@ -482,92 +490,90 @@ function takePosition(signal) {
 
 function addRandomSignal() {
     const isBuy = Math.random() > 0.45;
-    const names = ["RAZGON", "ICT Order Block", "EMA 9/21 Cross", "SMC Liquidity Grab", "Bollinger Squeeze"];
+    const names = ["RAZGON", "ICT Order Block", "EMA Cross", "SMC OB", "Bollinger Squeeze"];
     const name = names[Math.floor(Math.random() * names.length)];
 
     const signal = {
         emoji: isBuy ? '⬆️' : '⬇️',
         name: `${name} ${isBuy ? 'BUY' : 'SELL'}`,
         symbol: currentSymbol,
-        confluence: isConfluence ? 91 + Math.floor(Math.random() * 8) : 74 + Math.floor(Math.random() * 20),
+        confluence: isConfluence ? 92 + Math.floor(Math.random()*7) : 75 + Math.floor(Math.random()*19),
         isBuy: isBuy
     };
 
     if (isConfluence && signal.confluence < 88) return;
 
     addToLog(signal);
-    if (Math.random() > 0.4) takePosition(signal);
+    if (Math.random() > 0.38) takePosition(signal);
 }
 
 function scanMarket() {
     const btn = document.querySelector('button[onclick="scanMarket()"]');
     const orig = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin mr-2"></i>SCANNING...`;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i>`;
     btn.disabled = true;
+
     setTimeout(() => {
         renderChart();
         for (let i = 0; i < 4; i++) addRandomSignal();
         btn.innerHTML = orig;
         btn.disabled = false;
-    }, 900);
+    }, 850);
 }
 
 function clearLog() {
     document.getElementById('signal-log').innerHTML = '';
 }
 
-// Neural Vision (7-bosqichdan)
-function handleFile(file) {
-    if (!file || !file.type.startsWith('image/')) return alert("Faqat rasm faylini yuklang!");
-    const dropZone = document.getElementById('drop-zone');
-    dropZone.innerHTML = `<i class="fas fa-spinner fa-spin text-6xl text-violet-400"></i><p class="mt-6">AI tahlil qilinmoqda...</p>`;
-    setTimeout(showAnalysisResult, 1600);
-}
-
+// Neural Vision (qisqa versiya)
 function showAnalysisResult() {
-    document.getElementById('drop-zone').classList.add('hidden');
-    const resultDiv = document.getElementById('analysis-result');
-    resultDiv.classList.remove('hidden');
-    resultDiv.innerHTML = `
-        <div class="glass rounded-3xl p-7 text-center">
-            <div class="text-violet-400 text-sm font-bold">NEURAL VISION DETECTED</div>
-            <div class="text-6xl font-bold mt-4 text-emerald-400">STRONG BUY</div>
-            <div class="text-7xl font-mono text-cyan-400 my-6">96%</div>
-            <div class="text-slate-300">RAZGON + ICT + EMA Confluence</div>
-            <div class="mt-8 flex gap-4">
-                <button onclick="executeTradeFromAnalysis()" class="flex-1 py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-500 rounded-3xl font-bold">TRADE OCHISH</button>
-                <button onclick="resetAnalyzer()" class="flex-1 py-4 bg-slate-700 rounded-3xl font-bold">YANA YUKLASH</button>
-            </div>
+    const dropZone = document.getElementById('drop-zone');
+    const result = document.getElementById('analysis-result');
+    dropZone.classList.add('hidden');
+    result.classList.remove('hidden');
+    result.innerHTML = `
+        <div class="glass rounded-3xl p-6 text-center">
+            <div class="text-emerald-400 text-lg font-bold">HIGH CONFIDENCE SIGNAL</div>
+            <div class="text-6xl font-mono my-4 text-cyan-400">95%</div>
+            <div class="text-xl">RAZGON + ICT BUY</div>
+            <button onclick="executeTradeFromAnalysis();resetAnalyzer()" 
+                    class="mt-6 w-full py-4 bg-gradient-to-r from-cyan-500 to-violet-500 rounded-3xl font-bold">
+                TRADE OCHISH
+            </button>
         </div>
     `;
 }
 
 function executeTradeFromAnalysis() {
-    alert("Neural Signal bo‘yicha trade ochildi!");
     addRandomSignal();
 }
 
 function resetAnalyzer() {
     document.getElementById('analysis-result').classList.add('hidden');
     document.getElementById('drop-zone').classList.remove('hidden');
-    document.getElementById('drop-zone').innerHTML = `
-        <i class="fas fa-cloud-upload-alt text-6xl text-slate-500 mb-4"></i>
-        <p class="font-medium text-center">Screenshot yuklang<br>yoki shu yerga torting</p>
-    `;
 }
 
-// Drag & Drop
+// Drag & Drop setup
 const dropZone = document.getElementById('drop-zone');
 const fileInput = document.getElementById('screenshot-input');
-dropZone.addEventListener('click', () => fileInput.click());
-fileInput.addEventListener('change', e => e.target.files[0] && handleFile(e.target.files[0]));
 
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = '#a855f7'; });
+dropZone.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files[0]) {
+        dropZone.innerHTML = `<i class="fas fa-spinner fa-spin text-5xl"></i><p class="mt-4">Tahlil qilinmoqda...</p>`;
+        setTimeout(showAnalysisResult, 1200);
+    }
+});
+
+dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.style.borderColor = '#c084fc'; });
 dropZone.addEventListener('dragleave', () => dropZone.style.borderColor = '#475569');
-dropZone.addEventListener('drop', e => {
+dropZone.addEventListener('drop', (e) => {
     e.preventDefault();
     dropZone.style.borderColor = '#475569';
-    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+    if (e.dataTransfer.files[0]) {
+        dropZone.innerHTML = `<i class="fas fa-spinner fa-spin text-5xl"></i><p class="mt-4">Tahlil qilinmoqda...</p>`;
+        setTimeout(showAnalysisResult, 1200);
+    }
 });
 
 function changeTimeframe(tf) {
@@ -597,11 +603,16 @@ function initializeApp() {
     document.getElementById('current-symbol').textContent = currentSymbol;
 
     updateLivePrice();
-    setTimeout(() => addRandomSignal(), 600);
-    setTimeout(() => addRandomSignal(), 1400);
-    setTimeout(() => addRandomSignal(), 2200);
 
-    console.log('%c8-BOSQICH TUGADI — Dizayn to‘liq polished! Neon, glow va premium ko‘rinish qo‘shildi.', 'color:#ff00ff; font-size:16px; font-weight:bold');
+    // Initial signals
+    setTimeout(addRandomSignal, 500);
+    setTimeout(addRandomSignal, 1200);
+    setTimeout(addRandomSignal, 2100);
+
+    // Resize listener
+    window.addEventListener('resize', handleResize);
+
+    console.log('%c9-BOSQICH TUGADI — Performance optimizatsiya va mobil moslashuv to‘liq bajarildi!', 'color:#22d3ee; font-size:16px; font-weight:bold');
 }
 
 window.onload = initializeApp;
