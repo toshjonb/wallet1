@@ -18,7 +18,7 @@
         .title-font { font-family: 'Space Grotesk', sans-serif; }
 
         .glass {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.88);
             backdrop-filter: blur(28px);
             border: 1px solid rgba(148, 163, 184, 0.35);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
@@ -35,15 +35,14 @@
 
         .neon-cyan { text-shadow: 0 0 25px #00f5ff, 0 0 50px #00f5ff; }
 
-        /* SIGNAL PANEL - TO‘LIQ TEPAGA OCHILADIGAN RESIZABLE + DRAGGABLE */
+        /* SIGNAL PANEL */
         #signal-panel {
-            position: relative;
             height: 280px;
-            transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            transition: height 0.45s cubic-bezier(0.32, 0.72, 0, 1);
             user-select: none;
             z-index: 40;
         }
-
         #signal-panel.fullscreen {
             height: 100vh !important;
             position: fixed;
@@ -51,10 +50,27 @@
             left: 0;
             right: 0;
             z-index: 100;
-            border-top: none;
         }
 
-        #signal-drag-handle {
+        /* DEMO ACCOUNT PANEL (o‘ng taraf) */
+        #demo-panel {
+            height: 100%;
+            position: relative;
+            transition: height 0.45s cubic-bezier(0.32, 0.72, 0, 1);
+            user-select: none;
+            z-index: 40;
+        }
+        #demo-panel.fullscreen {
+            height: 100vh !important;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 380px;
+            z-index: 100;
+        }
+
+        /* Umumiy drag va resize handle */
+        .drag-handle {
             position: absolute;
             top: 8px;
             left: 50%;
@@ -66,13 +82,11 @@
             cursor: grab;
             z-index: 50;
         }
-
-        #signal-drag-handle:active {
+        .drag-handle:active {
             background: #ff00ff;
             cursor: grabbing;
         }
-
-        #signal-resize-handle {
+        .resize-handle {
             position: absolute;
             top: -8px;
             left: 0;
@@ -145,7 +159,7 @@
         </div>
     </div>
 
-    <!-- MAIN AREA -->
+    <!-- MAIN CHART AREA -->
     <div class="flex-1 flex flex-col min-h-0 relative">
         <div class="h-16 border-b border-slate-700 bg-zinc-950/90 backdrop-blur-xl flex items-center px-8 justify-between z-10">
             <div class="flex items-center gap-8">
@@ -175,14 +189,10 @@
             <div id="chart" class="w-full h-full"></div>
         </div>
 
-        <!-- PASTDAGI SIGNAL PANEL - TO‘LIQ TEPAGA OCHILADI -->
+        <!-- SIGNAL PANEL -->
         <div id="signal-panel" class="glass border-t border-slate-700 p-6 relative">
-            <!-- Drag Handle -->
-            <div id="signal-drag-handle" class="absolute top-3 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-slate-400 rounded-full cursor-grab active:cursor-grabbing z-50"></div>
-            
-            <!-- Resize Handle -->
-            <div id="signal-resize-handle" class="absolute -top-2 left-0 right-0 h-8 cursor-ns-resize z-40"></div>
-
+            <div id="signal-drag-handle" class="drag-handle"></div>
+            <div id="signal-resize-handle" class="resize-handle"></div>
             <div class="flex justify-between mb-4 items-center pt-6">
                 <div class="uppercase text-xs tracking-widest font-medium flex items-center gap-2">
                     <i class="fas fa-signal"></i> REAL-TIME SIGNALS (20 STRATEGIES)
@@ -193,8 +203,11 @@
         </div>
     </div>
 
-    <!-- RIGHT PANEL -->
-    <div class="w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col">
+    <!-- RIGHT PANEL - DEMO ACCOUNT (Yangi resizable + draggable) -->
+    <div id="demo-panel" class="w-full lg:w-96 bg-zinc-950 border-l border-slate-700 flex flex-col relative">
+        <div id="demo-drag-handle" class="drag-handle"></div>
+        <div id="demo-resize-handle" class="resize-handle"></div>
+
         <div class="p-7 border-b border-slate-700">
             <div class="text-xs uppercase tracking-widest text-slate-400 mb-2">DEMO ACCOUNT • REAL</div>
             <div class="flex justify-between items-end">
@@ -229,7 +242,7 @@
 </div>
 
 <script>
-// ==================== TO‘LIQ TEPAGA OCHILADIGAN RESIZABLE + DRAGGABLE PANEL ====================
+// ==================== RESIZABLE + DRAGGABLE (Signal + Demo Panel) ====================
 
 let chart = null;
 let candleSeries = null;
@@ -243,42 +256,39 @@ let balance = 12458.75;
 let equity = 12521.40;
 let positions = [];
 
-let signalPanel, isDragging = false, isResizing = false, startY = 0, startHeight = 0;
+// Umumiy resizable funksiyasi
+function makeResizable(panelId) {
+    const panel = document.getElementById(panelId);
+    const dragHandle = panel.querySelector('.drag-handle');
+    const resizeHandle = panel.querySelector('.resize-handle');
 
-function initializeResizablePanel() {
-    signalPanel = document.getElementById('signal-panel');
-    const dragHandle = document.getElementById('signal-drag-handle');
-    const resizeHandle = document.getElementById('signal-resize-handle');
+    let isDragging = false, isResizing = false, startY = 0, startHeight = 0;
 
-    // Drag (yuqoriga tortish)
     dragHandle.addEventListener('mousedown', (e) => {
         isDragging = true;
         startY = e.clientY;
-        startHeight = signalPanel.offsetHeight;
+        startHeight = panel.offsetHeight;
         document.body.style.cursor = 'grabbing';
     });
 
-    // Resize
     resizeHandle.addEventListener('mousedown', (e) => {
         isResizing = true;
         startY = e.clientY;
-        startHeight = signalPanel.offsetHeight;
+        startHeight = panel.offsetHeight;
         document.body.style.cursor = 'ns-resize';
     });
 
     document.addEventListener('mousemove', (e) => {
         if (!isDragging && !isResizing) return;
-
         const diff = startY - e.clientY;
         let newHeight = startHeight + diff;
 
-        // To‘liq tepaga ochilish chegarasi
-        if (newHeight > window.innerHeight * 0.85) {
-            signalPanel.classList.add('fullscreen');
+        if (newHeight > window.innerHeight * 0.8) {
+            panel.classList.add('fullscreen');
         } else {
-            signalPanel.classList.remove('fullscreen');
+            panel.classList.remove('fullscreen');
             newHeight = Math.max(200, Math.min(newHeight, window.innerHeight - 100));
-            signalPanel.style.height = newHeight + 'px';
+            panel.style.height = newHeight + 'px';
         }
     });
 
@@ -289,10 +299,9 @@ function initializeResizablePanel() {
     });
 }
 
-// Qolgan funksiyalar (oldingi versiyadan bir xil)
-function createChart() {
+function initializeApp() {
+    // Chart yaratish
     const container = document.getElementById('chart');
-    if (chart) chart.remove();
     chart = LightweightCharts.createChart(container, {
         width: container.clientWidth,
         height: container.clientHeight,
@@ -306,6 +315,35 @@ function createChart() {
         borderUpColor: '#22c55e', borderDownColor: '#ef4444',
         wickUpColor: '#86efac', wickDownColor: '#f87171'
     });
+
+    renderChart();
+    updateSymbols();
+    renderStrategies();
+    updateRisk(1.8);
+    renderPositions();
+
+    document.getElementById('current-symbol').textContent = currentSymbol;
+    updateLivePrice();
+
+    // Har ikkala panelni resizable qilish
+    makeResizable('signal-panel');
+    makeResizable('demo-panel');
+
+    setTimeout(addRandomSignal, 400);
+    setTimeout(addRandomSignal, 1100);
+    setTimeout(addRandomSignal, 1800);
+    setInterval(addRandomSignal, 4500);
+
+    console.log('%c✅ Endi ham SIGNAL PANEL ham DEMO ACCOUNT bo‘limi resizable + draggable! Yuqoriga tortib to‘liq ochiladi.', 'color:#ff00ff; font-size:18px; font-weight:bold');
+}
+
+// Qolgan funksiyalar (oldingi versiyadan)
+function renderChart() {
+    if (!candleSeries) return;
+    const data = generateMockCandles();
+    candleSeries.setData(data);
+    chart.timeScale().fitContent();
+    addRealisticSignalsToChart(data);
 }
 
 function generateMockCandles(count = 220) {
@@ -324,14 +362,6 @@ function generateMockCandles(count = 220) {
         time += 900;
     }
     return data;
-}
-
-function renderChart() {
-    if (!candleSeries) return;
-    const data = generateMockCandles();
-    candleSeries.setData(data);
-    chart.timeScale().fitContent();
-    addRealisticSignalsToChart(data);
 }
 
 function addRealisticSignalsToChart(data) {
@@ -424,7 +454,6 @@ function updateRisk(val) {
 function renderPositions() {
     const container = document.getElementById('positions-list');
     container.innerHTML = positions.length === 0 ? `<div class="text-center py-16 text-slate-500">Ochiq pozitsiya yo‘q</div>` : '';
-    // ... (oldingi renderPositions kodi)
 }
 
 function addToLog(signal) {
@@ -502,26 +531,21 @@ function toggleFullScreen() {
     else document.exitFullscreen();
 }
 
-function initializeApp() {
-    createChart();
-    renderChart();
-    updateSymbols();
-    renderStrategies();
-    updateRisk(1.8);
-    renderPositions();
-
-    document.getElementById('current-symbol').textContent = currentSymbol;
-    updateLivePrice();
-
-    initializeResizablePanel();
-
-    setTimeout(addRandomSignal, 400);
-    setTimeout(addRandomSignal, 1100);
-    setTimeout(addRandomSignal, 1800);
-    setInterval(addRandomSignal, 4500);
-
-    console.log('%c✅ Pastdagi SIGNAL PANEL endi to‘liq tepaga ochiladigan resizable + draggable holatda!', 'color:#ff00ff; font-size:18px; font-weight:bold');
+function updateEquity() {
+    const openPL = positions.reduce((sum, p) => sum + p.pl, 0);
+    equity = balance + openPL;
+    document.getElementById('equity').innerHTML = `$${equity.toFixed(2)} <span class="text-xs text-emerald-400">(+0.50%)</span>`;
+    const totalEl = document.getElementById('total-pl');
+    totalEl.textContent = (openPL >= 0 ? '+' : '') + '$' + openPL.toFixed(2);
+    totalEl.className = openPL >= 0 ? "text-3xl font-bold text-emerald-400" : "text-3xl font-bold text-red-400";
 }
+
+const symbolsByMarket = {
+    0: ["EURUSD", "GBPUSD", "USDJPY", "AUDUSD"],
+    1: ["BTCUSDT", "ETHUSDT", "SOLUSDT"],
+    2: ["Volatility 75", "Boom 500", "Crash 1000", "Step Index"],
+    3: ["AAPL", "TSLA", "NVDA"]
+};
 
 window.onload = initializeApp;
 </script>
